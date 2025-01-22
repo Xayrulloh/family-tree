@@ -1,6 +1,8 @@
 {
-  "name": "@deeng/shared",
+  "name": "@family-tree/shared",
   "version": "0.0.1",
-  "dependencies": {},
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
   "private": true
 }
