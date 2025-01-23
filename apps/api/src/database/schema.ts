@@ -57,47 +57,51 @@ export const FCMTokens = pgTable('fcm_tokens', {
 
 // relations
 export const usersRelations = relations(users, ({ many }) => ({
-  familyTrees: many(familyTrees, { relationName: 'user-family-trees' }),
-  familyMembers: many(familyMembers, { relationName: 'user-family-members' }),
-  fcmTokens: many(FCMTokens, { relationName: 'user-fcm-tokens' }),
+  familyTrees: many(familyTrees, { relationName: 'family-tree-creator' }),
+  familyMembers: many(familyMembers, { relationName: 'family-member-parent1' }),
+  familyMembers2: many(familyMembers, { relationName: 'family-member-parent2' }),
+  fcmTokens: many(FCMTokens, { relationName: 'user-fcm-token' }),
 }))
 
 export const familyTreesRelations = relations(familyTrees, ({ one, many }) => ({
-  familyMembers: many(familyMembers, { relationName: 'family-tree-family-members' }),
+  familyMembers: many(familyMembers, {relationName: 'family-tree-family-member'}),
   creator: one(users, {
     fields: [familyTrees.createdBy],
     references: [users.id],
-    relationName: 'family-tree-creator',
+    relationName: 'family-tree-creator'
   })
 }))
 
-export const familyMembersRelations = relations(familyMembers, ({ one }) => ({
+export const familyMembersRelations = relations(familyMembers, ({ one, many }) => ({
   familyTree: one(familyTrees, {
     fields: [familyMembers.familyTreeId],
     references: [familyTrees.id],
-    relationName: 'family-member-family-tree',
+    relationName: 'family-tree-family-member'
   }),
   user: one(users, {
     fields: [familyMembers.userId],
     references: [users.id],
-    relationName: 'family-member-user',
+    relationName: 'family-member-parent1'
   }),
   parentFamilyTree: one(familyMembers, {
     fields: [familyMembers.parentFamilyTreeId],
     references: [familyMembers.id],
-    relationName: 'family-member-parent-family-tree',
+    relationName: 'family-member-recursive'
   }),
   spouse: one(users, {
     fields: [familyMembers.spouseId],
     references: [users.id],
-    relationName: 'family-member-spouse',
+    relationName: 'family-member-parent2'
   }),
+  childFamilyTree: many(familyMembers, {
+    relationName: 'family-member-recursive'
+  })
 }))
 
 export const FCMTokensRelations = relations(FCMTokens, ({ one }) => ({
   user: one(users, {
     fields: [FCMTokens.userId],
     references: [users.id],
-    relationName: 'fcm-token-user',
+    relationName: 'user-fcm-token'
   }),
 }))
