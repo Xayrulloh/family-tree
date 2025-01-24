@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { env } from './config/env/env';
 import cookieParser from 'cookie-parser';
 import { globalPrefix } from './utils/constants';
+import SwaggerBuilder from './config/swagger/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,9 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const port = env().PORT;
+
+  // swagger
+  SwaggerBuilder.make(app);
 
   await app.listen(port);
 
