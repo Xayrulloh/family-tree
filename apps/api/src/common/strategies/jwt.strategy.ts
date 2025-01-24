@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private configService: ConfigService,
     @Inject(DrizzleAsyncProvider)
-        private db: NodePgDatabase<typeof schema>,
+    private db: NodePgDatabase<typeof schema>
   ) {
     const extractJwtFromCookie = (req: Request) => {
       let token = null;
@@ -35,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayloadType) {
     const user = await this.db.query.usersSchema.findFirst({
       where: (users, { eq }) => eq(users.email, payload.email),
-    })
+    });
 
     if (!user) throw new UnauthorizedException('Please log in to continue');
 

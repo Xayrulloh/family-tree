@@ -1,11 +1,32 @@
-import { chainRoute, type RouteInstance, type RouteParams, type RouteParamsAndQuery } from 'atomic-router';
-import { createEffect, createEvent, createStore, Event, sample } from 'effector';
+import {
+  chainRoute,
+  type RouteInstance,
+  type RouteParams,
+  type RouteParamsAndQuery,
+} from 'atomic-router';
+import {
+  createEffect,
+  createEvent,
+  createStore,
+  Event,
+  sample,
+} from 'effector';
 import { and, condition, not } from 'patronum';
-import { type ComponentProps, type ComponentType, createElement, lazy, memo } from 'react';
+import {
+  type ComponentProps,
+  type ComponentType,
+  createElement,
+  lazy,
+  memo,
+} from 'react';
 
-export type LazyPageProps<Model, Props extends object = object> = Props & { model: Model };
+export type LazyPageProps<Model, Props extends object = object> = Props & {
+  model: Model;
+};
 
-export type LazyPageFactoryParams<Params extends RouteParams = Record<string, unknown>> = {
+export type LazyPageFactoryParams<
+  Params extends RouteParams = Record<string, unknown>
+> = {
   route: RouteInstance<Params>;
 };
 
@@ -13,7 +34,7 @@ export const createLazyPage = <
   Params extends RouteParams,
   Model,
   Page extends ComponentType<{ model: Model }>,
-  StaticDeps extends Record<string, unknown>,
+  StaticDeps extends Record<string, unknown>
 >({
   route,
   load,
@@ -22,7 +43,9 @@ export const createLazyPage = <
   route: RouteInstance<Params>;
   staticDeps?: StaticDeps;
   load: () => Promise<{
-    createModel: (params: { route: RouteInstance<Params> } & StaticDeps) => Model | Promise<Model>;
+    createModel: (
+      params: { route: RouteInstance<Params> } & StaticDeps
+    ) => Model | Promise<Model>;
     component: Page;
   }>;
 }) => {
@@ -41,7 +64,9 @@ export const createLazyPage = <
     const { component, createModel } = await load();
 
     if (!model) {
-      model = Promise.resolve(createModel({ route: chainedRoute, ...staticDeps }));
+      model = Promise.resolve(
+        createModel({ route: chainedRoute, ...staticDeps })
+      );
     }
 
     return {
@@ -74,7 +99,7 @@ export const createLazyPage = <
       Component.displayName = `Lazy${Component.displayName ?? 'Page'}`;
 
       return { default: Component };
-    }),
+    })
   );
 };
 

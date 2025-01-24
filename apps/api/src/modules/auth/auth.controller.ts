@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleOauthGuard } from '../../common/guards/google-oauth.guard';
 import { UserSchemaType } from '@family-tree/shared';
@@ -22,8 +16,11 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthCallback(@Req() req: Request & { user: UserSchemaType }, @Res() res: Response): Promise<void> {
-    const user = req.user; 
+  async googleAuthCallback(
+    @Req() req: Request & { user: UserSchemaType },
+    @Res() res: Response
+  ): Promise<void> {
+    const user = req.user;
 
     if (!user) {
       throw new Error('No user found in request');

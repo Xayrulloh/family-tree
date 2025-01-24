@@ -12,7 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     private configService: ConfigService,
     @Inject(DrizzleAsyncProvider)
-    private db: NodePgDatabase<typeof schema>,
+    private db: NodePgDatabase<typeof schema>
   ) {
     super({
       clientID: configService.get<string>('GOOGLE_CLIENT_ID')!,
@@ -26,24 +26,27 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _accessToken: string,
     _refreshToken: string,
     profile: GoogleProfileType,
-    done: VerifyCallback,
+    done: VerifyCallback
   ): Promise<void> {
     const { id, name, emails, photos } = profile;
 
     let user = await this.db.query.usersSchema.findFirst({
-      where: (users, { eq }) => eq(users.email, emails[0].value)
-    })
+      where: (users, { eq }) => eq(users.email, emails[0].value),
+    });
 
     if (!user) {
-      const newUser = await this.db.insert(schema.usersSchema).values({
-        email: emails[0].value,
-        name: `${name.givenName} ${name.familyName}`,
-        username: emails[0].value.split('@')[0] + `-${id}`,
-        image: photos[0].value,
-        gender: UserGenderEnum.UNKNOWN,
-      }).returning()
+      const newUser = await this.db
+        .insert(schema.usersSchema)
+        .values({
+          email: emails[0].value,
+          name: `${name.givenName} ${name.familyName}`,
+          username: emails[0].value.split('@')[0] + `-${id}`,
+          image: photos[0].value,
+          gender: UserGenderEnum.UNKNOWN,
+        })
+        .returning();
 
-      user = newUser[0]
+      user = newUser[0];
     }
 
     done(null, user);

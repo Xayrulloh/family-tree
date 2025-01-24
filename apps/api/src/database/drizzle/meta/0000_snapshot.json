@@ -60,12 +60,8 @@
           "name": "fcm_tokens_user_id_users_id_fk",
           "tableFrom": "fcm_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -143,12 +139,8 @@
           "name": "family_members_family_tree_id_family_trees_id_fk",
           "tableFrom": "family_members",
           "tableTo": "family_trees",
-          "columnsFrom": [
-            "family_tree_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_tree_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -156,12 +148,8 @@
           "name": "family_members_user_id_users_id_fk",
           "tableFrom": "family_members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -169,12 +157,8 @@
           "name": "family_members_parent_id_family_members_id_fk",
           "tableFrom": "family_members",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -182,12 +166,8 @@
           "name": "family_members_spouse_id_users_id_fk",
           "tableFrom": "family_members",
           "tableTo": "users",
-          "columnsFrom": [
-            "spouse_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["spouse_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -260,12 +240,8 @@
           "name": "family_trees_created_by_users_id_fk",
           "tableFrom": "family_trees",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -358,19 +334,12 @@
     "public.fcm_token_device_type": {
       "name": "fcm_token_device_type",
       "schema": "public",
-      "values": [
-        "ANDROID",
-        "IOS",
-        "WEB"
-      ]
+      "values": ["ANDROID", "IOS", "WEB"]
     },
     "public.user_gender": {
       "name": "user_gender",
       "schema": "public",
-      "values": [
-        "MALE",
-        "FEMALE"
-      ]
+      "values": ["MALE", "FEMALE"]
     }
   },
   "schemas": {},

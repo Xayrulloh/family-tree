@@ -8,9 +8,9 @@ const createBrowserHistoryFx = createEffect(() => createBrowserHistory());
 sample({
   clock: appStarted,
   target: createBrowserHistoryFx,
-})
+});
 
 sample({
   clock: createBrowserHistoryFx.doneData,
   target: router.setHistory,
-})
+});

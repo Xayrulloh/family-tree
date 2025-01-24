@@ -8,19 +8,21 @@ import { GoogleStrategy } from '../../common/strategies/google.strategy';
 import { DrizzleModule } from '../../database/drizzle.module';
 
 @Module({
-  imports: [ConfigModule, DrizzleModule, JwtModule.registerAsync({
-
-    global: true,
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    useFactory: async (configService) => ({
-      secret: configService.get('JWT_SECRET'),
-      signOptions: {
-        expiresIn: '1d',
-      },
-    })
-
-  })],
+  imports: [
+    ConfigModule,
+    DrizzleModule,
+    JwtModule.registerAsync({
+      global: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '1d',
+        },
+      }),
+    }),
+  ],
   exports: [JwtModule],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy],

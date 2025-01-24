@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -8,12 +8,12 @@ const envSchema = z.object({
   GOOGLE_CALLBACK_URL: z.string().url(),
   JWT_SECRET: z.string().min(1),
   COOKIES_SECRET: z.string().min(1),
-})
+});
 
 type envType = z.infer<typeof envSchema>;
 
 function validateEnv() {
-    return envSchema.parse(process.env);
+  return envSchema.parse(process.env);
 }
 
-export { envType, validateEnv }
+export { envType, validateEnv };

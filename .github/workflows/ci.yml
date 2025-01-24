@@ -31,3 +31,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
 
+      # Check for formatting issues
+      - name: Checking code format
+        run: pnpm run check:lint

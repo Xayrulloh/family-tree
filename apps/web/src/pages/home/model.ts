@@ -1,5 +1,5 @@
-import { LazyPageFactoryParams } from "../../shared/lib/lazy-page";
+import { LazyPageFactoryParams } from '../../shared/lib/lazy-page';
 
-export const factory = ({route: _}: LazyPageFactoryParams) => {
-  return {}
-}
+export const factory = ({ route: _ }: LazyPageFactoryParams) => {
+  return {};
+};

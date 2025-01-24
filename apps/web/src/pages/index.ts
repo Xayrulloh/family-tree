@@ -3,4 +3,4 @@ import { Home } from './home';
 
 export const Routing = createRoutesView({
   routes: [Home],
-})
+});

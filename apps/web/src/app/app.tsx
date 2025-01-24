@@ -1,8 +1,8 @@
-import { appStarted } from "../shared/config/system";
+import { appStarted } from '../shared/config/system';
 import { router } from '../shared/config/routing';
 import { RouterProvider } from 'atomic-router-react';
 import './model';
-import { Routing } from "../pages";
+import { Routing } from '../pages';
 
 appStarted();
 
@@ -11,5 +11,5 @@ export const App: React.FC = () => {
     <RouterProvider router={router}>
       <Routing />
     </RouterProvider>
-  )
-}
+  );
+};

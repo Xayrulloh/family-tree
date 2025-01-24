@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@family-tree/shared": ["apps/shared/src/index.ts"],
+      "@family-tree/shared": ["apps/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

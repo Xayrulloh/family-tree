@@ -7,7 +7,9 @@
     "start:frontend": "nx serve web",
     "drizzle:generate": "nx run api:db:generate",
     "drizzle:push": "nx run api:db:push",
-    "drizzle:studio": "nx run api:db:studio"
+    "drizzle:studio": "nx run api:db:studio",
+    "format": "nx format:write",
+    "check:lint": "nx affected --target=lint"
   },
   "private": true,
   "dependencies": {

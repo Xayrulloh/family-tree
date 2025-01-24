@@ -9,7 +9,7 @@ import cookiesConfig from './cookies.config';
 export class CookiesModule implements NestModule {
   constructor(
     @Inject(cookiesConfig.KEY)
-    private readonly config: ConfigType<typeof cookiesConfig>,
+    private readonly config: ConfigType<typeof cookiesConfig>
   ) {}
 
   configure(consumer: MiddlewareConsumer) {
