@@ -27,8 +27,8 @@ import { HttpExceptionFilter } from './common/filters/http.filter';
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter
-    }
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

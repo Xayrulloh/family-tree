@@ -2,7 +2,10 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as schema from '../../database/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../database/drizzle.provider';
-import { FCMTokenCreateDeleteRequestType, FCMTokenResponseType } from '@family-tree/shared';
+import {
+  FCMTokenCreateDeleteRequestType,
+  FCMTokenResponseType,
+} from '@family-tree/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 
 @Injectable()
@@ -12,7 +15,9 @@ export class FCMTokenService {
     private db: NodePgDatabase<typeof schema>
   ) {}
 
-  async create(body: FCMTokenCreateDeleteRequestType): Promise<FCMTokenResponseType> {
+  async create(
+    body: FCMTokenCreateDeleteRequestType
+  ): Promise<FCMTokenResponseType> {
     const FCMToken = await this.db
       .insert(schema.FCMTokensSchema)
       .values({
@@ -22,7 +27,7 @@ export class FCMTokenService {
       })
       .returning();
 
-    return FCMToken[0]
+    return FCMToken[0];
   }
 
   async delete(body: FCMTokenCreateDeleteRequestType): Promise<void> {
@@ -32,15 +37,20 @@ export class FCMTokenService {
         eq(schema.FCMTokensSchema.token, body.token),
         eq(schema.FCMTokensSchema.deviceType, body.deviceType),
         isNull(schema.FCMTokensSchema.deletedAt)
-      )
-    })
+      ),
+    });
 
     if (!FCMToken) {
-      throw new NotFoundException(`FCM Token with device type ${body.deviceType} and token ${body.token} not found`)
+      throw new NotFoundException(
+        `FCM Token with device type ${body.deviceType} and token ${body.token} not found`
+      );
     }
 
-    await this.db.update(schema.FCMTokensSchema).set({
-      deletedAt: new Date().toISOString()
-    }).where(eq(schema.FCMTokensSchema.id, FCMToken.id))
+    await this.db
+      .update(schema.FCMTokensSchema)
+      .set({
+        deletedAt: new Date().toISOString(),
+      })
+      .where(eq(schema.FCMTokensSchema.id, FCMToken.id));
   }
 }

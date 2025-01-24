@@ -25,9 +25,13 @@ export const DrizzleFCMTokenDeviceEnum = pgEnum('fcm_token_device_type', [
 // schemas
 const baseSchema = {
   id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at', {mode: 'string', withTimezone: true}).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', {mode: 'string', withTimezone: true}).defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at', {mode: 'string', withTimezone: true}),
+  createdAt: timestamp('created_at', { mode: 'string', withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  deletedAt: timestamp('deleted_at', { mode: 'string', withTimezone: true }),
 };
 
 export const usersSchema = pgTable('users', {

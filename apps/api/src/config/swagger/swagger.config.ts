@@ -1,7 +1,7 @@
-import { INestApplication } from "@nestjs/common";
+import { INestApplication } from '@nestjs/common';
 import basicAuth from 'express-basic-auth';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { patchNestJsSwagger } from "nestjs-zod";
+import { patchNestJsSwagger } from 'nestjs-zod';
 
 class SwaggerBuilder {
   static make(app: INestApplication): void {
@@ -12,12 +12,14 @@ class SwaggerBuilder {
         users: {
           admin: 'password',
         },
-      }),
+      })
     );
 
     const config = new DocumentBuilder()
       .setTitle('Family-Tree API Docs')
-      .setDescription('Here you can see all the endpoints with request/response examples')
+      .setDescription(
+        'Here you can see all the endpoints with request/response examples'
+      )
       .addBearerAuth()
       .addApiKey({ in: 'header', name: 'api-key', type: 'apiKey' }, 'api-key')
       .build();

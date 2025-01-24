@@ -1,6 +1,16 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { FCMTokenService } from './fcm-token.service';
-import { FCMTokenCreateDeleteRequestDto, FCMTokenResponseDto } from './dto/fcm-token.dto';
+import {
+  FCMTokenCreateDeleteRequestDto,
+  FCMTokenResponseDto,
+} from './dto/fcm-token.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger/dist/decorators';
 
@@ -14,7 +24,9 @@ export class FCMTokenController {
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: FCMTokenResponseDto })
   @ZodSerializerDto(FCMTokenResponseDto)
-  post(@Body() body: FCMTokenCreateDeleteRequestDto): Promise<FCMTokenResponseDto> {
+  post(
+    @Body() body: FCMTokenCreateDeleteRequestDto
+  ): Promise<FCMTokenResponseDto> {
     return this.fcmTokenService.create(body);
   }
 
