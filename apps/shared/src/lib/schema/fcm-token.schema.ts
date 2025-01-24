@@ -8,8 +8,8 @@ enum FCMTokenDeviceEnum {
 }
 
 const FCMTokenSchema = z.object({
-  userId: z.string().nonempty(),
-  token: z.string().nonempty(),
+  userId: z.string().min(1),
+  token: z.string().min(1),
   deviceType: z.nativeEnum(FCMTokenDeviceEnum)
 }).merge(BaseSchema)
 

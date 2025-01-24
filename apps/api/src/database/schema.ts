@@ -6,81 +6,83 @@ import {
   boolean,
   uuid,
   pgEnum,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { FCMTokenDeviceEnum, UserGenderEnum } from '@family-tree/shared'
 
 // enums
-export const DrizzleUserGenderEnum = pgEnum('user_gender', [UserGenderEnum.MALE, UserGenderEnum.FEMALE]);
+export const DrizzleUserGenderEnum = pgEnum('user_gender', [UserGenderEnum.MALE, UserGenderEnum.FEMALE, UserGenderEnum.UNKNOWN]);
 export const DrizzleFCMTokenDeviceEnum = pgEnum('fcm_token_device_type', [FCMTokenDeviceEnum.ANDROID, FCMTokenDeviceEnum.IOS, FCMTokenDeviceEnum.WEB]);
 
 // schemas
-const baseTable = {
-  id: uuid('id').primaryKey(),
+const baseSchema = {
+  id: uuid('id').primaryKey().defaultRandom(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),
   deletedAt: timestamp('deleted_at', { mode: 'date' }),
 }
 
-export const users = pgTable('users', {
+export const usersSchema = pgTable('users', {
+  email: text('email').unique().notNull(),
   username: text('username'),
   name: text('name').notNull(),
   image: text('image'),
   gender: DrizzleUserGenderEnum('gender').notNull(),
   alive: boolean('alive').default(true).notNull(),
   birthdate: timestamp('birthdate', { mode: 'date' }),
-  ...baseTable
+  ...baseSchema
 });
 
-export const familyTrees = pgTable('family_trees', {
+export const familyTreesSchema = pgTable('family_trees', {
   name: text('name').notNull(),
-  createdBy: uuid('created_by').references(() => users.id).notNull(),
+  createdBy: uuid('created_by').references(() => usersSchema.id).notNull(),
   image: text('image'),
   visibility: boolean('visibility').default(false).notNull(),
-  ...baseTable
+  ...baseSchema
 });
 
 export const familyMembers = pgTable('family_members', {
   name: text('name').notNull(),
-  familyTreeId: uuid('family_tree_id').references(() => familyTrees.id).notNull(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
-  parentFamilyTreeId: uuid('parent_id').references(() => familyMembers.id),
-  spouseId: uuid('spouse_id').references(() => users.id),
-  ...baseTable
+  familyTreeId: uuid('family_tree_id').references(() => familyTreesSchema.id).notNull(),
+  userId: uuid('user_id').references(() => usersSchema.id).notNull(),
+  parentFamilyTreeId: uuid('parent_id').references((): AnyPgColumn => familyMembers.id),
+  spouseId: uuid('spouse_id').references(() => usersSchema.id),
+  ...baseSchema
 });
 
-export const FCMTokens = pgTable('fcm_tokens', {
+export const FCMTokensSchema = pgTable('fcm_tokens', {
   token: text('token').notNull(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
+  userId: uuid('user_id').references(() => usersSchema.id).notNull(),
   deviceType: DrizzleFCMTokenDeviceEnum('device_type').notNull(),
-  ...baseTable
+  ...baseSchema
 });
 
 // relations
-export const usersRelations = relations(users, ({ many }) => ({
-  familyTrees: many(familyTrees, { relationName: 'family-tree-creator' }),
+export const usersRelations = relations(usersSchema, ({ many }) => ({
+  familyTrees: many(familyTreesSchema, { relationName: 'family-tree-creator' }),
   familyMembers: many(familyMembers, { relationName: 'family-member-parent1' }),
   familyMembers2: many(familyMembers, { relationName: 'family-member-parent2' }),
-  fcmTokens: many(FCMTokens, { relationName: 'user-fcm-token' }),
+  fcmTokens: many(FCMTokensSchema, { relationName: 'user-fcm-token' }),
 }))
 
-export const familyTreesRelations = relations(familyTrees, ({ one, many }) => ({
+export const familyTreesRelations = relations(familyTreesSchema, ({ one, many }) => ({
   familyMembers: many(familyMembers, {relationName: 'family-tree-family-member'}),
-  creator: one(users, {
-    fields: [familyTrees.createdBy],
-    references: [users.id],
+  creator: one(usersSchema, {
+    fields: [familyTreesSchema.createdBy],
+    references: [usersSchema.id],
     relationName: 'family-tree-creator'
   })
 }))
 
 export const familyMembersRelations = relations(familyMembers, ({ one, many }) => ({
-  familyTree: one(familyTrees, {
+  familyTree: one(familyTreesSchema, {
     fields: [familyMembers.familyTreeId],
-    references: [familyTrees.id],
+    references: [familyTreesSchema.id],
     relationName: 'family-tree-family-member'
   }),
-  user: one(users, {
+  user: one(usersSchema, {
     fields: [familyMembers.userId],
-    references: [users.id],
+    references: [usersSchema.id],
     relationName: 'family-member-parent1'
   }),
   parentFamilyTree: one(familyMembers, {
@@ -88,9 +90,9 @@ export const familyMembersRelations = relations(familyMembers, ({ one, many }) =
     references: [familyMembers.id],
     relationName: 'family-member-recursive'
   }),
-  spouse: one(users, {
+  spouse: one(usersSchema, {
     fields: [familyMembers.spouseId],
-    references: [users.id],
+    references: [usersSchema.id],
     relationName: 'family-member-parent2'
   }),
   childFamilyTree: many(familyMembers, {
@@ -98,10 +100,10 @@ export const familyMembersRelations = relations(familyMembers, ({ one, many }) =
   })
 }))
 
-export const FCMTokensRelations = relations(FCMTokens, ({ one }) => ({
-  user: one(users, {
-    fields: [FCMTokens.userId],
-    references: [users.id],
+export const FCMTokensRelations = relations(FCMTokensSchema, ({ one }) => ({
+  user: one(usersSchema, {
+    fields: [FCMTokensSchema.userId],
+    references: [usersSchema.id],
     relationName: 'user-fcm-token'
   }),
 }))

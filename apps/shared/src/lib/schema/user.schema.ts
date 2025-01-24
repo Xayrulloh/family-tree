@@ -3,11 +3,13 @@ import { BaseSchema } from './base.schema'
 
 enum UserGenderEnum {
   MALE = 'MALE',
-  FEMALE = 'FEMALE'
+  FEMALE = 'FEMALE',
+  UNKNOWN = 'UNKNOWN'
 }
 
 const UserSchema = z.object({
-  name: z.string().nonempty().min(3),
+  email: z.string().email(),
+  name: z.string().min(1).min(3),
   username: z.string().nullable(),
   image: z.string().nullable(),
   gender: z.nativeEnum(UserGenderEnum),
