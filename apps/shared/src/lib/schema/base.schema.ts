@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 const BaseSchema = z.object({
   id: z.string().min(1),
-  createdAt: z.string().date().min(1),
-  updatedAt: z.string().date().min(1),
-  deletedAt: z.string().date().nullable(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  deletedAt: z.coerce.date().nullable(),
 });
 
 type BaseSchemaType = z.infer<typeof BaseSchema>;

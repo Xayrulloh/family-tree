@@ -5,8 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import * as schema from '../../database/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../database/drizzle.provider';
-import { JwtPayloadType } from '@family-tree/shared';
+import { JwtPayloadType, UserSchemaType } from '@family-tree/shared';
 import { Request } from 'express';
+import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -19,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       let token = null;
 
       if (req && req.cookies) {
-        token = req.cookies['access_token'];
+        token = req.cookies[COOKIES_ACCESS_TOKEN_KEY];
       }
 
       return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
@@ -32,16 +33,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayloadType) {
+  async validate(payload: JwtPayloadType): Promise<UserSchemaType> {
     const user = await this.db.query.usersSchema.findFirst({
       where: (users, { eq }) => eq(users.email, payload.email),
     });
 
     if (!user) throw new UnauthorizedException('Please log in to continue');
 
-    return {
-      id: payload.sub,
-      email: payload.email,
-    };
+    return user
   }
 }

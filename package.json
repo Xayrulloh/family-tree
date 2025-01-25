@@ -1,6 +1,6 @@
 {
   "name": "@family-tree/source",
-  "version": "0.0.0",
+  "version": "0.1.11",
   "license": "MIT",
   "scripts": {
     "start:backend": "nx serve api",
