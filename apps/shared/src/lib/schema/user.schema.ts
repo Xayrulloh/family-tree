@@ -9,13 +9,13 @@ enum UserGenderEnum {
 
 const UserSchema = z
   .object({
-    email: z.string().email(),
+    email: z.string().email().nullable(),
     name: z.string().min(1).min(3),
     username: z.string().nullable(),
     image: z.string().nullable(),
     gender: z.nativeEnum(UserGenderEnum),
-    alive: z.boolean(),
-    birthdate: z.string().date().nullable(),
+    deathdate: z.coerce.date().nullable(),
+    birthdate: z.coerce.date().nullable(),
   })
   .merge(BaseSchema);
 

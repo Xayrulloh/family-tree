@@ -1,10 +1,13 @@
-import { FCMTokenSchema } from '@family-tree/shared';
+import {
+  FCMTokenCreateDeleteRequestSchema,
+  FCMTokenResponseSchema,
+} from '@family-tree/shared';
 import { createZodDto } from 'nestjs-zod';
 
 class FCMTokenCreateDeleteRequestDto extends createZodDto(
-  FCMTokenSchema.pick({ token: true, deviceType: true })
+  FCMTokenCreateDeleteRequestSchema
 ) {}
 
-class FCMTokenResponseDto extends createZodDto(FCMTokenSchema) {}
+class FCMTokenResponseDto extends createZodDto(FCMTokenResponseSchema) {}
 
 export { FCMTokenCreateDeleteRequestDto, FCMTokenResponseDto };

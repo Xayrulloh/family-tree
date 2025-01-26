@@ -1,4 +1,3 @@
-export * from './auth.schema';
 export * from './base.schema';
 export * from './family-member.schema';
 export * from './family-tree.schema';

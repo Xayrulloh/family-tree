@@ -8,6 +8,7 @@ import { DrizzleAsyncProvider } from '../../database/drizzle.provider';
 import { JwtPayloadType, UserSchemaType } from '@family-tree/shared';
 import { Request } from 'express';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
+import { and, eq, isNull } from 'drizzle-orm';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -34,12 +35,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayloadType): Promise<UserSchemaType> {
-    const user = await this.db.query.usersSchema.findFirst({
-      where: (users, { eq }) => eq(users.email, payload.email),
-    });
+    const [user] = await this.db
+      .select()
+      .from(schema.usersSchema)
+      .where(
+        and(
+          eq(schema.usersSchema.email, payload.email),
+          isNull(schema.usersSchema.deletedAt)
+        )
+      )
+      .limit(1);
 
     if (!user) throw new UnauthorizedException('Please log in to continue');
 
-    return user
+    return user;
   }
 }

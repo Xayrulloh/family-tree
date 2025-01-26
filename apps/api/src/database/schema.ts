@@ -35,13 +35,13 @@ const baseSchema = {
 };
 
 export const usersSchema = pgTable('users', {
-  email: text('email').unique().notNull(),
+  email: text('email').unique(),
   username: text('username'),
   name: text('name').notNull(),
   image: text('image'),
   gender: DrizzleUserGenderEnum('gender').notNull(),
-  alive: boolean('alive').default(true).notNull(),
-  birthdate: timestamp('birthdate', { mode: 'string' }),
+  deathdate: timestamp('death_date', { mode: 'date', withTimezone: true }),
+  birthdate: timestamp('birth_date', { mode: 'date', withTimezone: true }),
   ...baseSchema,
 });
 
@@ -55,7 +55,7 @@ export const familyTreesSchema = pgTable('family_trees', {
   ...baseSchema,
 });
 
-export const familyMembers = pgTable('family_members', {
+export const familyMembersSchema = pgTable('family_members', {
   name: text('name').notNull(),
   familyTreeId: uuid('family_tree_id')
     .references(() => familyTreesSchema.id)
@@ -64,7 +64,7 @@ export const familyMembers = pgTable('family_members', {
     .references(() => usersSchema.id)
     .notNull(),
   parentFamilyTreeId: uuid('parent_id').references(
-    (): AnyPgColumn => familyMembers.id
+    (): AnyPgColumn => familyMembersSchema.id
   ),
   spouseId: uuid('spouse_id').references(() => usersSchema.id),
   ...baseSchema,
@@ -82,8 +82,10 @@ export const FCMTokensSchema = pgTable('fcm_tokens', {
 // relations
 export const usersRelations = relations(usersSchema, ({ many }) => ({
   familyTrees: many(familyTreesSchema, { relationName: 'family-tree-creator' }),
-  familyMembers: many(familyMembers, { relationName: 'family-member-parent1' }),
-  familyMembers2: many(familyMembers, {
+  familyMembers: many(familyMembersSchema, {
+    relationName: 'family-member-parent1',
+  }),
+  familyMembers2: many(familyMembersSchema, {
     relationName: 'family-member-parent2',
   }),
   fcmTokens: many(FCMTokensSchema, { relationName: 'user-fcm-token' }),
@@ -92,7 +94,7 @@ export const usersRelations = relations(usersSchema, ({ many }) => ({
 export const familyTreesRelations = relations(
   familyTreesSchema,
   ({ one, many }) => ({
-    familyMembers: many(familyMembers, {
+    familyMembers: many(familyMembersSchema, {
       relationName: 'family-tree-family-member',
     }),
     creator: one(usersSchema, {
@@ -104,29 +106,29 @@ export const familyTreesRelations = relations(
 );
 
 export const familyMembersRelations = relations(
-  familyMembers,
+  familyMembersSchema,
   ({ one, many }) => ({
     familyTree: one(familyTreesSchema, {
-      fields: [familyMembers.familyTreeId],
+      fields: [familyMembersSchema.familyTreeId],
       references: [familyTreesSchema.id],
       relationName: 'family-tree-family-member',
     }),
     user: one(usersSchema, {
-      fields: [familyMembers.userId],
+      fields: [familyMembersSchema.userId],
       references: [usersSchema.id],
       relationName: 'family-member-parent1',
     }),
-    parentFamilyTree: one(familyMembers, {
-      fields: [familyMembers.parentFamilyTreeId],
-      references: [familyMembers.id],
+    parentFamilyTree: one(familyMembersSchema, {
+      fields: [familyMembersSchema.parentFamilyTreeId],
+      references: [familyMembersSchema.id],
       relationName: 'family-member-recursive',
     }),
     spouse: one(usersSchema, {
-      fields: [familyMembers.spouseId],
+      fields: [familyMembersSchema.spouseId],
       references: [usersSchema.id],
       relationName: 'family-member-parent2',
     }),
-    childFamilyTree: many(familyMembers, {
+    childFamilyTree: many(familyMembersSchema, {
       relationName: 'family-member-recursive',
     }),
   })
