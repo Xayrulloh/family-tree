@@ -62,11 +62,11 @@ export class UserService {
     }
 
     if (user.gender !== body.gender) {
-      // FIXME:  think about it
+      // FIXME: Need to think about related family trees
     }
 
     if (user.image !== body.image) {
-      // FIXME:  think about it
+      // FIXME: must delete the old image
     }
 
     await this.db
