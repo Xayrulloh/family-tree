@@ -1,6 +1,6 @@
 {
-  "id": "3fbe661c-d3b6-4d3e-b275-88c820804f7f",
-  "prevId": "cc114aa0-c743-47e4-afdb-19193cf5d271",
+  "id": "eaf4da60-8699-4d43-bb26-749031f2efac",
+  "prevId": "8026217f-6d32-4173-8794-e4d670fb0be2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -263,7 +263,7 @@
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "username": {
           "name": "username",
@@ -290,16 +290,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "alive": {
-          "name": "alive",
-          "type": "boolean",
+        "death_date": {
+          "name": "death_date",
+          "type": "date",
           "primaryKey": false,
-          "notNull": true,
-          "default": true
+          "notNull": false
         },
-        "birthdate": {
-          "name": "birthdate",
-          "type": "timestamp",
+        "birth_date": {
+          "name": "birth_date",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },

@@ -6,6 +6,7 @@ import { DrizzleAsyncProvider } from '../../database/drizzle.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../../database/schema';
 import { GoogleProfileType, UserGenderEnum } from '@family-tree/shared';
+import { and, eq, isNull } from 'drizzle-orm';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -30,12 +31,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     const { id, name, emails, photos } = profile;
 
-    let user = await this.db.query.usersSchema.findFirst({
-      where: (users, { eq }) => eq(users.email, emails[0].value),
-    });
+    let [user] = await this.db
+      .select()
+      .from(schema.usersSchema)
+      .where(
+        and(
+          eq(schema.usersSchema.email, emails[0].value),
+          isNull(schema.usersSchema.deletedAt)
+        )
+      )
+      .limit(1);
 
     if (!user) {
-      const newUser = await this.db
+      const [newUser] = await this.db
         .insert(schema.usersSchema)
         .values({
           email: emails[0].value,
@@ -46,7 +54,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         })
         .returning();
 
-      user = newUser[0];
+      user = newUser;
     }
 
     done(null, user);

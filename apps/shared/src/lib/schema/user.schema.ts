@@ -9,13 +9,31 @@ enum UserGenderEnum {
 
 const UserSchema = z
   .object({
-    email: z.string().email(),
-    name: z.string().min(1).min(3),
-    username: z.string().nullable(),
-    image: z.string().nullable(),
-    gender: z.nativeEnum(UserGenderEnum),
-    alive: z.boolean(),
-    birthdate: z.string().date().nullable(),
+    email: z
+      .string()
+      .email()
+      .nullable()
+      .describe('Registered google email account'),
+    name: z.string().min(1).min(3).describe('Default google account name'),
+    username: z
+      .string()
+      .nullable()
+      .describe(
+        'Unique username from google and it only exist on registered users'
+      ),
+    image: z
+      .string()
+      .nullable()
+      .describe(
+        'Image url which comes only from client side but may delete from back on updates'
+      ),
+    gender: z
+      .nativeEnum(UserGenderEnum)
+      .describe(
+        "Only male or female and for the beginning as we don't know we put unknown"
+      ),
+    deathdate: z.string().date().nullable().describe('Date of death'),
+    birthdate: z.string().date().nullable().describe('Date of birth'),
   })
   .merge(BaseSchema);
 

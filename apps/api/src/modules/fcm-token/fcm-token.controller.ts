@@ -14,8 +14,13 @@ import {
   FCMTokenResponseDto,
 } from './dto/fcm-token.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { ApiCookieAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger/dist/decorators';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import {
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiTags,
+} from '@nestjs/swagger/dist/decorators';
+import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { Request } from 'express';
 
@@ -24,26 +29,30 @@ import { Request } from 'express';
 export class FCMTokenController {
   constructor(private readonly fcmTokenService: FCMTokenService) {}
 
+  // Client side sends FCM token in order to send push notifications
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: FCMTokenResponseDto })
   @ZodSerializerDto(FCMTokenResponseDto)
-  post(
+  createFcmToken(
     @Req() req: Request,
-    @Body() body: FCMTokenCreateDeleteRequestDto,
+    @Body() body: FCMTokenCreateDeleteRequestDto
   ): Promise<FCMTokenResponseDto> {
-    return this.fcmTokenService.create(req.user!.id, body);
+    return this.fcmTokenService.createFcmToken(req.user!.id, body);
   }
 
+  // Client may send unused FCM token in order to delete it
   @Delete()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(
+  @ApiNoContentResponse()
+  deleteFcmToken(
     @Req() req: Request,
-    @Body() body: FCMTokenCreateDeleteRequestDto): Promise<void> {
-    return this.fcmTokenService.delete(req.user!.id, body);
+    @Body() body: FCMTokenCreateDeleteRequestDto
+  ): Promise<void> {
+    return this.fcmTokenService.deleteFcmToken(req.user!.id, body);
   }
 }

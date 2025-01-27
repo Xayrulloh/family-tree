@@ -22,6 +22,20 @@
       "when": 1737808956159,
       "tag": "0002_needy_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1737918011054,
+      "tag": "0003_conscious_wendigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1737969655489,
+      "tag": "0004_damp_marvex",
+      "breakpoints": true
     }
   ]
 }
