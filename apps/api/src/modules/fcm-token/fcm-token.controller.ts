@@ -7,13 +7,13 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FCMTokenService } from './fcm-token.service';
 import {
   FCMTokenCreateDeleteRequestDto,
   FCMTokenResponseDto,
 } from './dto/fcm-token.dto';
-import { ZodSerializerDto } from 'nestjs-zod';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -23,6 +23,8 @@ import {
 import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { Request } from 'express';
+import { FCMTokenResponseSchema } from '@family-tree/shared';
+import { ZodValidationInterceptor } from '../../common/interceptors/zod.response.interceptor';
 
 @ApiTags('FCM Token')
 @Controller('fcm-token')
@@ -35,7 +37,7 @@ export class FCMTokenController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: FCMTokenResponseDto })
-  @ZodSerializerDto(FCMTokenResponseDto)
+  @UseInterceptors(new ZodValidationInterceptor(FCMTokenResponseSchema))
   createFcmToken(
     @Req() req: Request,
     @Body() body: FCMTokenCreateDeleteRequestDto

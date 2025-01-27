@@ -16,7 +16,6 @@ const UserUsernameParamSchema = z.object({
 });
 
 type UserUpdateRequestType = z.infer<typeof UserUpdateRequestSchema>;
-
 type UserUsernameParamType = z.infer<typeof UserUsernameParamSchema>;
 
 export {

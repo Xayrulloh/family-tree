@@ -8,6 +8,7 @@ import {
   Put,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -15,7 +16,6 @@ import {
   UserUpdateRequestDto,
   UserUsernameParamDto,
 } from './dto/user.dto';
-import { ZodSerializerDto } from 'nestjs-zod';
 import {
   ApiCookieAuth,
   ApiNoContentResponse,
@@ -26,6 +26,8 @@ import {
 import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { Request } from 'express';
+import { UserResponseSchema } from '@family-tree/shared';
+import { ZodValidationInterceptor } from '../../common/interceptors/zod.response.interceptor';
 
 @ApiTags('User')
 @Controller('users')
@@ -38,7 +40,7 @@ export class UserController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @ZodSerializerDto(UserResponseDto)
+  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
   async getUserThemselves(@Req() req: Request): Promise<UserResponseDto> {
     return this.userService.getUserThemselves(req.user!.id);
   }
@@ -50,7 +52,7 @@ export class UserController {
   @ApiParam({ name: 'username', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @ZodSerializerDto(UserResponseDto)
+  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
   async getUserByUsername(
     @Param() param: UserUsernameParamDto
   ): Promise<UserResponseDto> {
@@ -67,6 +69,6 @@ export class UserController {
     @Req() req: Request,
     @Body() body: UserUpdateRequestDto
   ): Promise<void> {
-    return this.userService.updateUser(req.user!.id, body);
+    return this.userService.updateUser(req.user!.id, body); // FIXME: instead of using '!' every time I should think something else
   }
 }

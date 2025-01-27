@@ -35,6 +35,6 @@ export class AuthController {
       sameSite: 'strict',
     });
 
-    res.redirect('http://localhost:8080/docs');
+    res.redirect('http://localhost:3000/docs');
   }
 }

@@ -8,6 +8,7 @@ import {
   pgEnum,
   AnyPgColumn,
   date,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { FCMTokenDeviceEnum, UserGenderEnum } from '@family-tree/shared';
 
@@ -46,15 +47,21 @@ export const usersSchema = pgTable('users', {
   ...baseSchema,
 });
 
-export const familyTreesSchema = pgTable('family_trees', {
-  name: text('name').notNull(),
-  createdBy: uuid('created_by')
-    .references(() => usersSchema.id)
-    .notNull(),
-  image: text('image'),
-  visibility: boolean('visibility').default(false).notNull(),
-  ...baseSchema,
-});
+export const familyTreesSchema = pgTable(
+  'family_trees',
+  {
+    name: text('name').notNull(),
+    createdBy: uuid('created_by')
+      .references(() => usersSchema.id)
+      .notNull(),
+    image: text('image'),
+    visibility: boolean('visibility').default(false).notNull(),
+    ...baseSchema,
+  },
+  (table) => ({
+    nameAndUserIdx: unique('name_and_user_idx').on(table.name, table.createdBy),
+  })
+);
 
 export const familyMembersSchema = pgTable('family_members', {
   name: text('name').notNull(),
