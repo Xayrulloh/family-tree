@@ -7,6 +7,7 @@ import {
   uuid,
   pgEnum,
   AnyPgColumn,
+  date,
 } from 'drizzle-orm/pg-core';
 import { FCMTokenDeviceEnum, UserGenderEnum } from '@family-tree/shared';
 
@@ -40,8 +41,8 @@ export const usersSchema = pgTable('users', {
   name: text('name').notNull(),
   image: text('image'),
   gender: DrizzleUserGenderEnum('gender').notNull(),
-  deathdate: timestamp('death_date', { mode: 'date', withTimezone: true }),
-  birthdate: timestamp('birth_date', { mode: 'date', withTimezone: true }),
+  deathdate: date('death_date', { mode: 'string' }),
+  birthdate: date('birth_date', { mode: 'string' }),
   ...baseSchema,
 });
 

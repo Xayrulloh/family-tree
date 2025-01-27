@@ -17,6 +17,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiTags,
 } from '@nestjs/swagger/dist/decorators';
 import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -47,6 +48,7 @@ export class FCMTokenController {
   @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
   deleteFcmToken(
     @Req() req: Request,
     @Body() body: FCMTokenCreateDeleteRequestDto
