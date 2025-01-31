@@ -1,32 +1,34 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ZodSchema } from 'zod';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor, StreamableFile } from "@nestjs/common";
+import { validate, ZodDto, ZodSerializationException } from "nestjs-zod";
+import { map, Observable } from "rxjs";
+import { ZodError, ZodSchema } from "zod";
+
+const REFLECTOR = "Reflector";
+
+const ZodSerializerDtoOptions = "ZOD_SERIALIZER_DTO_OPTIONS" as const;
+
+const createZodSerializationException = (error: ZodError) => {
+  return new ZodSerializationException(error);
+};
 
 @Injectable()
-export class ZodValidationInterceptor<T> implements NestInterceptor {
-  constructor(private schema: ZodSchema<T>) {}
+export class ZodSerializerInterceptorCustom implements NestInterceptor {
+  constructor(@Inject(REFLECTOR) protected readonly reflector: any) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const responseSchema = this.getContextResponseSchema(context);
+    
     return next.handle().pipe(
-      map((data) => {
-        const result = this.schema.safeParse(data);
+      map((res: object | object[]) => {
+        if (!responseSchema) return res;
+        if (typeof res !== "object" || res instanceof StreamableFile) return res;
 
-        if (!result.success) {
-          Logger.error(result.error);
-
-          throw new InternalServerErrorException('Oops something went wrong');
-        }
-
-        return result.data;
-      })
+        return validate(res, responseSchema, createZodSerializationException);
+      }),
     );
+  }
+
+  protected getContextResponseSchema(context: ExecutionContext): ZodDto | ZodSchema | undefined {
+    return this.reflector.getAllAndOverride(ZodSerializerDtoOptions, [context.getHandler(), context.getClass()]);
   }
 }

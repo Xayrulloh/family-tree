@@ -8,9 +8,11 @@ import {
 } from '@family-tree/shared';
 import { createZodDto } from 'nestjs-zod';
 
+// request // FIXME: lets separate by request and response
+
 class FamilyTreeCreateRequestDto extends createZodDto(
   FamilyTreeCreateRequestSchema
-) {}
+) {} // FIXME: lets put space between them
 class FamilyTreeUpdateRequestDto extends createZodDto(
   FamilyTreeUpdateRequestSchema
 ) {}

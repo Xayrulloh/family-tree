@@ -36,12 +36,13 @@ import {
   FamilyTreeArrayResponseSchema,
   FamilyTreeResponseSchema,
 } from '@family-tree/shared';
-import { ZodValidationInterceptor } from '../../common/interceptors/zod.response.interceptor';
+import { FamilyTreeRelationshipService } from '../family-tree-relationship/family-tree-relationship.service';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('Family Tree')
 @Controller('family-trees')
 export class FamilyTreeController {
-  constructor(private readonly familyTreeService: FamilyTreeService) {}
+  constructor(private readonly familyTreeService: FamilyTreeService, private readonly familyTreeRelationshipService: FamilyTreeRelationshipService) {}
 
   // Find family trees of user
   @Get()
@@ -49,7 +50,7 @@ export class FamilyTreeController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: FamilyTreeArrayResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(FamilyTreeArrayResponseSchema))
+  @ZodSerializerDto(FamilyTreeArrayResponseSchema)
   async getFamilyTreesOfUser(
     @Req() req: Request
   ): Promise<FamilyTreeArrayResponseDto> {
@@ -63,7 +64,7 @@ export class FamilyTreeController {
   @ApiParam({ name: 'name', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: FamilyTreeArrayResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(FamilyTreeArrayResponseSchema))
+  @ZodSerializerDto(FamilyTreeArrayResponseSchema)
   async getFamilyTreesByName(
     @Param() param: FamilyTreeNameParamDto
   ): Promise<FamilyTreeArrayResponseDto> {
@@ -77,7 +78,7 @@ export class FamilyTreeController {
   @ApiParam({ name: 'id', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: FamilyTreeResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(FamilyTreeResponseSchema))
+  @ZodSerializerDto(FamilyTreeResponseSchema)
   async getFamilyTreeById(
     @Param() param: FamilyTreeIdParamDto
   ): Promise<FamilyTreeResponseDto> {
@@ -90,12 +91,18 @@ export class FamilyTreeController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: FamilyTreeResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(FamilyTreeResponseSchema))
+  @ZodSerializerDto(FamilyTreeResponseSchema)
   async createFamilyTree(
     @Req() req: Request,
     @Body() body: FamilyTreeCreateRequestDto
   ): Promise<FamilyTreeResponseDto> {
-    return this.familyTreeService.createFamilyTree(req.user!.id, body);
+    const familyTree = await this.familyTreeService.createFamilyTree(req.user!.id, body);
+
+    // creating default parent
+    await this.familyTreeRelationshipService.createFamilyTreeRelationshipUserParentOfFamilyTree(
+      familyTree.id, {targetUserId: ''})
+
+    return familyTree;
   }
 
   // Update family tree by id

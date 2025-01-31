@@ -27,7 +27,7 @@ import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { Request } from 'express';
 import { UserResponseSchema } from '@family-tree/shared';
-import { ZodValidationInterceptor } from '../../common/interceptors/zod.response.interceptor';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('User')
 @Controller('users')
@@ -40,7 +40,7 @@ export class UserController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
+  @ZodSerializerDto(UserResponseSchema)
   async getUserThemselves(@Req() req: Request): Promise<UserResponseDto> {
     return this.userService.getUserThemselves(req.user!.id);
   }
@@ -52,7 +52,7 @@ export class UserController {
   @ApiParam({ name: 'username', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
+  @ZodSerializerDto(UserResponseSchema)
   async getUserByUsername(
     @Param() param: UserUsernameParamDto
   ): Promise<UserResponseDto> {

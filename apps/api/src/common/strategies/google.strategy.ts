@@ -31,7 +31,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     const { id, name, emails, photos } = profile;
 
-    let [user] = await this.db
+    let [user] = await this.db // FIXME: user query instead
       .select()
       .from(schema.usersSchema)
       .where(

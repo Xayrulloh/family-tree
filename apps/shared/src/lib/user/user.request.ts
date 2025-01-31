@@ -8,11 +8,9 @@ const UserUpdateRequestSchema = UserSchema.pick({
   birthdate: true,
   deathdate: true,
 }).partial();
+
 const UserUsernameParamSchema = z.object({
-  username: z
-    .string()
-    .min(1)
-    .regex(/^[a-zA-Z]+-\d+$/),
+  username: z.string().regex(/^[a-zA-Z]+-\d+$/),
 });
 
 type UserUpdateRequestType = z.infer<typeof UserUpdateRequestSchema>;

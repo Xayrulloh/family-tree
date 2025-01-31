@@ -43,6 +43,13 @@
       "when": 1738001013741,
       "tag": "0005_lucky_ben_grimm",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1738077437857,
+      "tag": "0006_fair_blackheart",
+      "breakpoints": true
     }
   ]
 }
