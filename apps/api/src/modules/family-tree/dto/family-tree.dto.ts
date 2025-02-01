@@ -13,13 +13,18 @@ import { createZodDto } from 'nestjs-zod';
 class FamilyTreeCreateRequestDto extends createZodDto(
   FamilyTreeCreateRequestSchema
 ) {} // FIXME: lets put space between them
+
 class FamilyTreeUpdateRequestDto extends createZodDto(
   FamilyTreeUpdateRequestSchema
 ) {}
+
 class FamilyTreeNameParamDto extends createZodDto(FamilyTreeNameParamSchema) {}
+
 class FamilyTreeIdParamDto extends createZodDto(IdQuerySchema) {}
 
+// response
 class FamilyTreeResponseDto extends createZodDto(FamilyTreeResponseSchema) {}
+
 class FamilyTreeArrayResponseDto extends createZodDto(
   FamilyTreeArrayResponseSchema
 ) {}

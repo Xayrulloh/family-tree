@@ -29,16 +29,20 @@ const FamilyTreeRelationshipFamilyTreeIdAndUserIdParamSchema =
 
 type FamilyTreeRelationshipCreateRequestType = z.infer<
   typeof FamilyTreeRelationshipCreateRequestSchema
->; // FIXME: lets put space between them
+>;
+
 type FamilyTreeRelationshipUpdateRequestType = z.infer<
   typeof FamilyTreeRelationshipUpdateRequestSchema
 >;
+
 type FamilyTreeRelationshipFamilyTreeIdParamType = z.infer<
   typeof FamilyTreeRelationshipFamilyTreeIdParamSchema
 >;
+
 type FamilyTreeRelationshipFamilyTreeIdAndUserIdParamType = z.infer<
   typeof FamilyTreeRelationshipFamilyTreeIdAndUserIdParamSchema
 >;
+
 type FamilyTreeRelationshipCreateSonOrDaughterRequestType = z.infer<
   typeof FamilyTreeRelationshipCreateSonOrDaughterRequestSchema
 >;

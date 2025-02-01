@@ -18,6 +18,7 @@ const FamilyTreeRelationshipResponseSchema = z.object({
 });
 
 const FamilyTreeRelationshipUserResponseSchema = UserResponseSchema;
+
 const FamilyTreeRelationshipUserArrayResponseSchema =
   UserResponseSchema.array();
 

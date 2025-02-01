@@ -14,6 +14,7 @@ const UserEmailParamSchema = z.object({
 });
 
 type UserUpdateRequestType = z.infer<typeof UserUpdateRequestSchema>;
+
 type UserUsernameParamType = z.infer<typeof UserEmailParamSchema>;
 
 export {
