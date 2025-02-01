@@ -246,32 +246,16 @@ export class FamilyTreeRelationshipService {
 
     // take ancestors and connect to new user
     const ancestors = await this.db.query.familyTreeRelationshipsSchema.findMany({
-      where: or(
+      where:
         and(
           eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-          eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId),
-          gte(schema.familyTreeRelationshipsSchema.depth, 1)
-        ),
-        and(
-          eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-          eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId),
-          gte(schema.familyTreeRelationshipsSchema.depth, 1)
-        ),
-      )
+          gte(schema.familyTreeRelationshipsSchema.depth, 1),
+          or(
+            eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId), 
+            eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId)
+          ),
+        )
     })
-
-    // TODO: check this query with above one (difference)
-    // const ancestors = await this.db.query.familyTreeRelationshipsSchema.findMany({
-    //   where:
-    //     and(
-    //       eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-    //       gte(schema.familyTreeRelationshipsSchema.depth, 1),
-    //       or(
-    //         eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId), 
-    //         eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId)
-    //       ),
-    //     )
-    // })
 
     // little family
     await this.db.insert(schema.familyTreeRelationshipsSchema).values([
@@ -376,32 +360,16 @@ export class FamilyTreeRelationshipService {
 
     // take ancestors and connect to new user
     const ancestors = await this.db.query.familyTreeRelationshipsSchema.findMany({
-      where: or(
+      where:
         and(
           eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-          eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId),
-          gte(schema.familyTreeRelationshipsSchema.depth, 1)
-        ),
-        and(
-          eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-          eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId),
-          gte(schema.familyTreeRelationshipsSchema.depth, 1)
-        ),
-      )
+          gte(schema.familyTreeRelationshipsSchema.depth, 1),
+          or(
+            eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId), 
+            eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId)
+          ),
+        )
     })
-
-    // TODO: check this query with above one (difference)
-    // const ancestors = await this.db.query.familyTreeRelationshipsSchema.findMany({
-    //   where:
-    //     and(
-    //       eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
-    //       gte(schema.familyTreeRelationshipsSchema.depth, 1),
-    //       or(
-    //         eq(schema.familyTreeRelationshipsSchema.descendantId, body.fatherId), 
-    //         eq(schema.familyTreeRelationshipsSchema.descendantId, body.motherId)
-    //       ),
-    //     )
-    // })
 
     // little family
     await this.db.insert(schema.familyTreeRelationshipsSchema).values([

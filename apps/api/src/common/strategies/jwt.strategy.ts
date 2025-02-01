@@ -35,16 +35,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayloadType): Promise<UserSchemaType> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(
-          eq(schema.usersSchema.email, payload.email),
-          isNull(schema.usersSchema.deletedAt)
-        )
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.email, payload.email),
+        isNull(schema.usersSchema.deletedAt)
       )
-      .limit(1);
+    })
 
     if (!user) throw new UnauthorizedException('Please log in to continue');
 

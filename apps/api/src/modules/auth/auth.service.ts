@@ -23,16 +23,12 @@ export class AuthService {
       throw new BadRequestException('Unauthenticated');
     }
 
-    const [userExists] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(
-          eq(schema.usersSchema.email, user.email!),
-          isNull(schema.usersSchema.deletedAt)
-        )
-      )
-      .limit(1);
+    const userExists = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.email, user.email!),
+        isNull(schema.usersSchema.deletedAt)
+      ),
+    });
 
     if (!userExists) {
       return this.registerUser(user);

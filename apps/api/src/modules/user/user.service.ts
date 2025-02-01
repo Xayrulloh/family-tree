@@ -14,16 +14,12 @@ export class UserService {
   ) {}
 
   async getUserByEmail(email: string): Promise<UserResponseType> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(
-          eq(schema.usersSchema.email, email),
-          isNull(schema.usersSchema.deletedAt)
-        )
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.email, email),
+        isNull(schema.usersSchema.deletedAt)
       )
-      .limit(1);
+    })
 
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
@@ -33,13 +29,12 @@ export class UserService {
   }
 
   async getUserThemselves(id: string): Promise<UserResponseType> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(eq(schema.usersSchema.id, id), isNull(schema.usersSchema.deletedAt))
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.id, id),
+        isNull(schema.usersSchema.deletedAt)
       )
-      .limit(1);
+    })
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -49,13 +44,12 @@ export class UserService {
   }
 
   async updateUser(id: string, body: UserUpdateRequestDto): Promise<void> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(eq(schema.usersSchema.id, id), isNull(schema.usersSchema.deletedAt))
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.id, id),
+        isNull(schema.usersSchema.deletedAt)
       )
-      .limit(1);
+    })
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);

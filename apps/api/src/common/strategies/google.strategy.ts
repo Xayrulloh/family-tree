@@ -31,16 +31,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     const { id, name, emails, photos } = profile;
 
-    let [user] = await this.db // FIXME: user query instead
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(
-          eq(schema.usersSchema.email, emails[0].value),
-          isNull(schema.usersSchema.deletedAt)
-        )
-      )
-      .limit(1);
+    let user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.email, emails[0].value),
+        isNull(schema.usersSchema.deletedAt)
+      ),
+    });
 
     if (!user) {
       const [newUser] = await this.db
