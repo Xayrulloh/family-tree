@@ -14,7 +14,7 @@ import { UserService } from './user.service';
 import {
   UserResponseDto,
   UserUpdateRequestDto,
-  UserUsernameParamDto,
+  UserEmailParamDto,
 } from './dto/user.dto';
 import {
   ApiCookieAuth,
@@ -45,18 +45,18 @@ export class UserController {
     return this.userService.getUserThemselves(req.user!.id);
   }
 
-  // Find exactly one user by its username (instead of mock user, users may connect real users)
-  @Get(':username')
+  // Find exactly one user by its email (instead of mock user, users may connect real users)
+  @Get(':email')
   @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
-  @ApiParam({ name: 'username', required: true, type: String })
+  @ApiParam({ name: 'email', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
   @ZodSerializerDto(UserResponseSchema)
-  async getUserByUsername(
-    @Param() param: UserUsernameParamDto
+  async getUserByEmail(
+    @Param() param: UserEmailParamDto
   ): Promise<UserResponseDto> {
-    return this.userService.getUserByUsername(param.username);
+    return this.userService.getUserByEmail(param.email);
   }
 
   // Update user themselves info

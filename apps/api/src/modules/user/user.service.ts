@@ -13,20 +13,20 @@ export class UserService {
     private db: NodePgDatabase<typeof schema>
   ) {}
 
-  async getUserByUsername(username: string): Promise<UserResponseType> {
+  async getUserByEmail(email: string): Promise<UserResponseType> {
     const [user] = await this.db
       .select()
       .from(schema.usersSchema)
       .where(
         and(
-          eq(schema.usersSchema.username, username),
+          eq(schema.usersSchema.email, email),
           isNull(schema.usersSchema.deletedAt)
         )
       )
       .limit(1);
 
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`User with email ${email} not found`);
     }
 
     return user;

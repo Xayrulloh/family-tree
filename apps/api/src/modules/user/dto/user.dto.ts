@@ -1,13 +1,13 @@
 import {
   UserResponseSchema,
   UserUpdateRequestSchema,
-  UserUsernameParamSchema,
+  UserEmailParamSchema,
 } from '@family-tree/shared';
 import { createZodDto } from 'nestjs-zod';
 
 class UserUpdateRequestDto extends createZodDto(UserUpdateRequestSchema) {}
-class UserUsernameParamDto extends createZodDto(UserUsernameParamSchema) {}
+class UserEmailParamDto extends createZodDto(UserEmailParamSchema) {}
 
 class UserResponseDto extends createZodDto(UserResponseSchema) {}
 
-export { UserUpdateRequestDto, UserUsernameParamDto, UserResponseDto };
+export { UserUpdateRequestDto, UserEmailParamDto, UserResponseDto };

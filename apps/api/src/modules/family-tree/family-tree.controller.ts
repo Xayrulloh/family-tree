@@ -10,7 +10,6 @@ import {
   Put,
   Req,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiCookieAuth,

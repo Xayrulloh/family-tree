@@ -44,7 +44,7 @@ export class FamilyTreeService {
           isNull(schema.familyTreesSchema.deletedAt)
         )
       )
-      .limit(10);
+      .limit(5);
   }
 
   async getFamilyTreeById(id: string): Promise<FamilyTreeResponseDto> {
