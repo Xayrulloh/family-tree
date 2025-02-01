@@ -69,15 +69,21 @@ export const familyTreeRelationshipsSchema = pgTable(
   {
     ancestorId: uuid('ancestor_id')
       .references(() => usersSchema.id)
-      .notNull(), // Ancestor (e.g., parent, grandparent)
+      .notNull(),
     descendantId: uuid('descendant_id')
       .references(() => usersSchema.id)
-      .notNull(), // Descendant (e.g., child, grandchild)
+      .notNull(),
     familyTreeId: uuid('family_tree_id')
       .references(() => familyTreesSchema.id)
-      .notNull(), // Family tree identifier
-    depth: integer('depth').notNull(), // Depth of the relationship
-    ...baseSchema, // FIXME: no need id primary key
+      .notNull(),
+    depth: integer('depth').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+    .defaultNow()
+    .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
   },
   (table) => ({
     pk: unique('relationship_pk').on(

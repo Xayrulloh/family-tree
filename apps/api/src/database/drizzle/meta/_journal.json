@@ -50,6 +50,13 @@
       "when": 1738077437857,
       "tag": "0006_fair_blackheart",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1738428647730,
+      "tag": "0007_parallel_black_panther",
+      "breakpoints": true
     }
   ]
 }
