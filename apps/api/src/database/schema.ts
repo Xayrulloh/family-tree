@@ -78,8 +78,8 @@ export const familyTreeRelationshipsSchema = pgTable(
       .notNull(),
     depth: integer('depth').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
-    .defaultNow()
-    .notNull(),
+      .defaultNow()
+      .notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -61,12 +61,8 @@
           "name": "fcm_tokens_user_id_users_id_fk",
           "tableFrom": "fcm_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -132,12 +128,8 @@
           "name": "family_tree_relationships_ancestor_id_users_id_fk",
           "tableFrom": "family_tree_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "ancestor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ancestor_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -145,12 +137,8 @@
           "name": "family_tree_relationships_descendant_id_users_id_fk",
           "tableFrom": "family_tree_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "descendant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["descendant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -158,12 +146,8 @@
           "name": "family_tree_relationships_family_tree_id_family_trees_id_fk",
           "tableFrom": "family_tree_relationships",
           "tableTo": "family_trees",
-          "columnsFrom": [
-            "family_tree_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_tree_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -173,11 +157,7 @@
         "relationship_pk": {
           "name": "relationship_pk",
           "nullsNotDistinct": false,
-          "columns": [
-            "ancestor_id",
-            "descendant_id",
-            "family_tree_id"
-          ]
+          "columns": ["ancestor_id", "descendant_id", "family_tree_id"]
         }
       },
       "policies": {},
@@ -247,12 +227,8 @@
           "name": "family_trees_created_by_users_id_fk",
           "tableFrom": "family_trees",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -262,10 +238,7 @@
         "name_and_user_idx": {
           "name": "name_and_user_idx",
           "nullsNotDistinct": false,
-          "columns": [
-            "name",
-            "created_by"
-          ]
+          "columns": ["name", "created_by"]
         }
       },
       "policies": {},
@@ -354,9 +327,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -368,20 +339,12 @@
     "public.fcm_token_device_type": {
       "name": "fcm_token_device_type",
       "schema": "public",
-      "values": [
-        "ANDROID",
-        "IOS",
-        "WEB"
-      ]
+      "values": ["ANDROID", "IOS", "WEB"]
     },
     "public.user_gender": {
       "name": "user_gender",
       "schema": "public",
-      "values": [
-        "MALE",
-        "FEMALE",
-        "UNKNOWN"
-      ]
+      "values": ["MALE", "FEMALE", "UNKNOWN"]
     }
   },
   "schemas": {},
