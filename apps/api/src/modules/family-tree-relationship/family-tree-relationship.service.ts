@@ -887,5 +887,3 @@ export class FamilyTreeRelationshipService {
     }
   }
 }
-
-// FIXME: try to call other services and use them, instead of directly calling db

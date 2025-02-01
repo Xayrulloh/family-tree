@@ -7,5 +7,5 @@ import { DrizzleModule } from '../../database/drizzle.module';
   imports: [DrizzleModule],
   controllers: [FamilyTreeRelationshipController],
   providers: [FamilyTreeRelationshipService],
-}) // FIXME: put space between them
+})
 export class FamilyTreeRelationshipModule {}
