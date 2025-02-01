@@ -8,7 +8,7 @@ const FamilyTreeRelationshipCreateRequestSchema = z.object({
 const FamilyTreeRelationshipCreateSonOrDaughterRequestSchema = z.object({
   fatherId: z.string().uuid(),
   motherId: z.string().uuid(),
-})
+});
 
 const FamilyTreeRelationshipUpdateRequestSchema = UserSchema.pick({
   name: true,

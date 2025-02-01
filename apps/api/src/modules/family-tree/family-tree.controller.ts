@@ -41,7 +41,10 @@ import { ZodSerializerDto } from 'nestjs-zod';
 @ApiTags('Family Tree')
 @Controller('family-trees')
 export class FamilyTreeController {
-  constructor(private readonly familyTreeService: FamilyTreeService, private readonly familyTreeRelationshipService: FamilyTreeRelationshipService) {}
+  constructor(
+    private readonly familyTreeService: FamilyTreeService,
+    private readonly familyTreeRelationshipService: FamilyTreeRelationshipService
+  ) {}
 
   // Find family trees of user
   @Get()
@@ -95,11 +98,16 @@ export class FamilyTreeController {
     @Req() req: Request,
     @Body() body: FamilyTreeCreateRequestDto
   ): Promise<FamilyTreeResponseDto> {
-    const familyTree = await this.familyTreeService.createFamilyTree(req.user!.id, body);
+    const familyTree = await this.familyTreeService.createFamilyTree(
+      req.user!.id,
+      body
+    );
 
     // creating default parent
     await this.familyTreeRelationshipService.createFamilyTreeRelationshipUserParentOfFamilyTree(
-      familyTree.id, {targetUserId: ''})
+      familyTree.id,
+      { targetUserId: '' }
+    );
 
     return familyTree;
   }

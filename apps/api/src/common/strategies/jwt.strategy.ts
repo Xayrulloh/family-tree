@@ -39,8 +39,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: and(
         eq(schema.usersSchema.email, payload.email),
         isNull(schema.usersSchema.deletedAt)
-      )
-    })
+      ),
+    });
 
     if (!user) throw new UnauthorizedException('Please log in to continue');
 

@@ -31,7 +31,7 @@ export class FCMTokenService {
         eq(schema.FCMTokensSchema.deviceType, body.deviceType),
         isNull(schema.FCMTokensSchema.deletedAt)
       ),
-    })
+    });
 
     if (isFCMTokenExist) {
       throw new BadRequestException(
@@ -62,7 +62,7 @@ export class FCMTokenService {
         eq(schema.FCMTokensSchema.deviceType, body.deviceType),
         isNull(schema.FCMTokensSchema.deletedAt)
       ),
-    })
+    });
 
     if (!FCMToken) {
       throw new NotFoundException(

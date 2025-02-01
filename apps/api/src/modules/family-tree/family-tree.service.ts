@@ -27,7 +27,7 @@ export class FamilyTreeService {
   ): Promise<FamilyTreeArrayResponseDto> {
     return this.db.query.familyTreesSchema.findMany({
       where: eq(schema.familyTreesSchema.createdBy, userId),
-    })
+    });
   }
 
   async getFamilyTreesByName(
@@ -39,8 +39,8 @@ export class FamilyTreeService {
         eq(schema.familyTreesSchema.visibility, true),
         isNull(schema.familyTreesSchema.deletedAt)
       ),
-      limit: 5
-    })
+      limit: 5,
+    });
   }
 
   async getFamilyTreeById(id: string): Promise<FamilyTreeResponseDto> {
@@ -49,7 +49,7 @@ export class FamilyTreeService {
         eq(schema.familyTreesSchema.id, id),
         isNull(schema.familyTreesSchema.deletedAt)
       ),
-    })
+    });
 
     if (!familyTree) {
       throw new NotFoundException(`Family tree with id ${id} not found`);
@@ -67,7 +67,7 @@ export class FamilyTreeService {
         eq(schema.familyTreesSchema.createdBy, userId),
         ilike(schema.familyTreesSchema.name, `%${body.name}%`)
       ),
-    })
+    });
 
     if (isFamilyTreeExist) {
       throw new BadRequestException(
@@ -99,7 +99,7 @@ export class FamilyTreeService {
         eq(schema.familyTreesSchema.createdBy, userId),
         isNull(schema.familyTreesSchema.deletedAt)
       ),
-    })
+    });
 
     if (!familyTree) {
       throw new NotFoundException(`Family tree with id ${id} not found`);
@@ -125,7 +125,7 @@ export class FamilyTreeService {
         eq(schema.familyTreesSchema.id, id),
         eq(schema.familyTreesSchema.createdBy, userId)
       ),
-    })
+    });
 
     if (!familyTree) {
       throw new NotFoundException(`Family tree with id ${id} not found`);

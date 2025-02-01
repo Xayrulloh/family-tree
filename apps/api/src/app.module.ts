@@ -19,7 +19,7 @@ import { ZodSerializerInterceptorCustom } from './common/interceptors/zod.respon
     CookiesModule,
     FCMTokenModule,
     FamilyTreeModule,
-    FamilyTreeRelationshipModule
+    FamilyTreeRelationshipModule,
   ],
   controllers: [],
   providers: [

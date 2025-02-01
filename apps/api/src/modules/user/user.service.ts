@@ -18,8 +18,8 @@ export class UserService {
       where: and(
         eq(schema.usersSchema.email, email),
         isNull(schema.usersSchema.deletedAt)
-      )
-    })
+      ),
+    });
 
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
@@ -33,8 +33,8 @@ export class UserService {
       where: and(
         eq(schema.usersSchema.id, id),
         isNull(schema.usersSchema.deletedAt)
-      )
-    })
+      ),
+    });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -48,8 +48,8 @@ export class UserService {
       where: and(
         eq(schema.usersSchema.id, id),
         isNull(schema.usersSchema.deletedAt)
-      )
-    })
+      ),
+    });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);

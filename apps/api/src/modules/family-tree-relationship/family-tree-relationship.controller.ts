@@ -85,7 +85,7 @@ export class FamilyTreeRelationshipController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @ApiParam({ name: 'familyTreeId', required: true, type: String })
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({type: FamilyTreeRelationshipUserArrayResponseDto})
+  @ApiCreatedResponse({ type: FamilyTreeRelationshipUserArrayResponseDto })
   @ZodSerializerDto(FamilyTreeRelationshipUserArrayResponseSchema)
   async createFamilyTreeRelationshipUserParentOfFamilyTree(
     @Param() param: FamilyTreeRelationshipFamilyTreeIdParamDto,
@@ -97,23 +97,23 @@ export class FamilyTreeRelationshipController {
     );
   }
 
-    // Create parent for target user
-    @Post(':familyTreeId/relationship/spouse')
-    @UseGuards(JWTAuthGuard)
-    @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
-    @ApiParam({ name: 'familyTreeId', required: true, type: String })
-    @HttpCode(HttpStatus.CREATED)
-    @ApiCreatedResponse({type: FamilyTreeRelationshipUserResponseDto})
-    @ZodSerializerDto(FamilyTreeRelationshipUserResponseSchema)
-    async createFamilyTreeRelationshipUserSpouseOfFamilyTree(
-      @Param() param: FamilyTreeRelationshipFamilyTreeIdParamDto,
-      @Body() body: FamilyTreeRelationshipCreateRequestDto
-    ): Promise<FamilyTreeRelationshipUserResponseDto> {
-      return this.familyTreeRelationshipService.createFamilyTreeRelationshipUserSpouseOfFamilyTree(
-        param.familyTreeId,
-        body
-      );
-    }
+  // Create parent for target user
+  @Post(':familyTreeId/relationship/spouse')
+  @UseGuards(JWTAuthGuard)
+  @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
+  @ApiParam({ name: 'familyTreeId', required: true, type: String })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: FamilyTreeRelationshipUserResponseDto })
+  @ZodSerializerDto(FamilyTreeRelationshipUserResponseSchema)
+  async createFamilyTreeRelationshipUserSpouseOfFamilyTree(
+    @Param() param: FamilyTreeRelationshipFamilyTreeIdParamDto,
+    @Body() body: FamilyTreeRelationshipCreateRequestDto
+  ): Promise<FamilyTreeRelationshipUserResponseDto> {
+    return this.familyTreeRelationshipService.createFamilyTreeRelationshipUserSpouseOfFamilyTree(
+      param.familyTreeId,
+      body
+    );
+  }
 
   // Create parent for target user
   @Post(':familyTreeId/relationship/daughter')
@@ -121,7 +121,7 @@ export class FamilyTreeRelationshipController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @ApiParam({ name: 'familyTreeId', required: true, type: String })
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({type: FamilyTreeRelationshipUserResponseDto})
+  @ApiCreatedResponse({ type: FamilyTreeRelationshipUserResponseDto })
   @ZodSerializerDto(FamilyTreeRelationshipUserResponseSchema)
   async createFamilyTreeRelationshipUserDaughterOfFamilyTree(
     @Param() param: FamilyTreeRelationshipFamilyTreeIdParamDto,
@@ -139,7 +139,7 @@ export class FamilyTreeRelationshipController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @ApiParam({ name: 'familyTreeId', required: true, type: String })
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({type: FamilyTreeRelationshipUserResponseDto})
+  @ApiCreatedResponse({ type: FamilyTreeRelationshipUserResponseDto })
   @ZodSerializerDto(FamilyTreeRelationshipUserResponseSchema)
   async createFamilyTreeRelationshipUserSonOfFamilyTree(
     @Param() param: FamilyTreeRelationshipFamilyTreeIdParamDto,
