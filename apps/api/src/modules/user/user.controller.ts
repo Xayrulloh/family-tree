@@ -14,7 +14,7 @@ import { UserService } from './user.service';
 import {
   UserResponseDto,
   UserUpdateRequestDto,
-  UserUsernameParamDto,
+  UserEmailParamDto,
 } from './dto/user.dto';
 import {
   ApiCookieAuth,
@@ -27,7 +27,7 @@ import { JWTAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { Request } from 'express';
 import { UserResponseSchema } from '@family-tree/shared';
-import { ZodValidationInterceptor } from '../../common/interceptors/zod.response.interceptor';
+import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('User')
 @Controller('users')
@@ -40,23 +40,23 @@ export class UserController {
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
+  @ZodSerializerDto(UserResponseSchema)
   async getUserThemselves(@Req() req: Request): Promise<UserResponseDto> {
     return this.userService.getUserThemselves(req.user!.id);
   }
 
-  // Find exactly one user by its username (instead of mock user, users may connect real users)
-  @Get(':username')
+  // Find exactly one user by its email (instead of mock user, users may connect real users)
+  @Get(':email')
   @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)
-  @ApiParam({ name: 'username', required: true, type: String })
+  @ApiParam({ name: 'email', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserResponseDto })
-  @UseInterceptors(new ZodValidationInterceptor(UserResponseSchema))
-  async getUserByUsername(
-    @Param() param: UserUsernameParamDto
+  @ZodSerializerDto(UserResponseSchema)
+  async getUserByEmail(
+    @Param() param: UserEmailParamDto
   ): Promise<UserResponseDto> {
-    return this.userService.getUserByUsername(param.username);
+    return this.userService.getUserByEmail(param.email);
   }
 
   // Update user themselves info

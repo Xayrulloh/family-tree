@@ -1,0 +1,1 @@
+ALTER TABLE "family_tree_relationships" DROP COLUMN IF EXISTS "id";

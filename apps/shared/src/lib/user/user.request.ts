@@ -8,19 +8,18 @@ const UserUpdateRequestSchema = UserSchema.pick({
   birthdate: true,
   deathdate: true,
 }).partial();
-const UserUsernameParamSchema = z.object({
-  username: z
-    .string()
-    .min(1)
-    .regex(/^[a-zA-Z]+-\d+$/),
+
+const UserEmailParamSchema = z.object({
+  email: z.string().email(),
 });
 
 type UserUpdateRequestType = z.infer<typeof UserUpdateRequestSchema>;
-type UserUsernameParamType = z.infer<typeof UserUsernameParamSchema>;
+
+type UserUsernameParamType = z.infer<typeof UserEmailParamSchema>;
 
 export {
   UserUpdateRequestSchema,
   UserUpdateRequestType,
-  UserUsernameParamSchema,
+  UserEmailParamSchema,
   UserUsernameParamType,
 };

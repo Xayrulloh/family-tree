@@ -6,7 +6,9 @@ const FamilyTreeCreateRequestSchema = FamilyTreeSchema.pick({
   name: true,
   visibility: true,
 });
+
 const FamilyTreeUpdateRequestSchema = FamilyTreeCreateRequestSchema.partial();
+
 const FamilyTreeNameParamSchema = z.object({
   name: z.string().min(3),
 });
@@ -14,9 +16,11 @@ const FamilyTreeNameParamSchema = z.object({
 type FamilyTreeCreateRequestType = z.infer<
   typeof FamilyTreeCreateRequestSchema
 >;
+
 type FamilyTreeUpdateRequestType = z.infer<
   typeof FamilyTreeUpdateRequestSchema
 >;
+
 type FamilyTreeUsernameParamType = z.infer<typeof FamilyTreeNameParamSchema>;
 
 export {

@@ -13,33 +13,28 @@ export class UserService {
     private db: NodePgDatabase<typeof schema>
   ) {}
 
-  async getUserByUsername(username: string): Promise<UserResponseType> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(
-          eq(schema.usersSchema.username, username),
-          isNull(schema.usersSchema.deletedAt)
-        )
-      )
-      .limit(1);
+  async getUserByEmail(email: string): Promise<UserResponseType> {
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.email, email),
+        isNull(schema.usersSchema.deletedAt)
+      ),
+    });
 
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
+      throw new NotFoundException(`User with email ${email} not found`);
     }
 
     return user;
   }
 
   async getUserThemselves(id: string): Promise<UserResponseType> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(eq(schema.usersSchema.id, id), isNull(schema.usersSchema.deletedAt))
-      )
-      .limit(1);
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.id, id),
+        isNull(schema.usersSchema.deletedAt)
+      ),
+    });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -49,13 +44,12 @@ export class UserService {
   }
 
   async updateUser(id: string, body: UserUpdateRequestDto): Promise<void> {
-    const [user] = await this.db
-      .select()
-      .from(schema.usersSchema)
-      .where(
-        and(eq(schema.usersSchema.id, id), isNull(schema.usersSchema.deletedAt))
-      )
-      .limit(1);
+    const user = await this.db.query.usersSchema.findFirst({
+      where: and(
+        eq(schema.usersSchema.id, id),
+        isNull(schema.usersSchema.deletedAt)
+      ),
+    });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);

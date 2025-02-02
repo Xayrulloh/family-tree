@@ -24,18 +24,14 @@ export class FCMTokenService {
     userId: string,
     body: FCMTokenCreateDeleteRequestType
   ): Promise<FCMTokenResponseType> {
-    const [isFCMTokenExist] = await this.db
-      .select()
-      .from(schema.FCMTokensSchema)
-      .where(
-        and(
-          eq(schema.FCMTokensSchema.userId, userId),
-          eq(schema.FCMTokensSchema.token, body.token),
-          eq(schema.FCMTokensSchema.deviceType, body.deviceType),
-          isNull(schema.FCMTokensSchema.deletedAt)
-        )
-      )
-      .limit(1);
+    const isFCMTokenExist = await this.db.query.FCMTokensSchema.findFirst({
+      where: and(
+        eq(schema.FCMTokensSchema.userId, userId),
+        eq(schema.FCMTokensSchema.token, body.token),
+        eq(schema.FCMTokensSchema.deviceType, body.deviceType),
+        isNull(schema.FCMTokensSchema.deletedAt)
+      ),
+    });
 
     if (isFCMTokenExist) {
       throw new BadRequestException(
@@ -59,18 +55,14 @@ export class FCMTokenService {
     userId: string,
     body: FCMTokenCreateDeleteRequestType
   ): Promise<void> {
-    const [FCMToken] = await this.db
-      .select()
-      .from(schema.FCMTokensSchema)
-      .where(
-        and(
-          eq(schema.FCMTokensSchema.userId, userId),
-          eq(schema.FCMTokensSchema.token, body.token),
-          eq(schema.FCMTokensSchema.deviceType, body.deviceType),
-          isNull(schema.FCMTokensSchema.deletedAt)
-        )
-      )
-      .limit(1);
+    const FCMToken = await this.db.query.FCMTokensSchema.findFirst({
+      where: and(
+        eq(schema.FCMTokensSchema.userId, userId),
+        eq(schema.FCMTokensSchema.token, body.token),
+        eq(schema.FCMTokensSchema.deviceType, body.deviceType),
+        isNull(schema.FCMTokensSchema.deletedAt)
+      ),
+    });
 
     if (!FCMToken) {
       throw new NotFoundException(

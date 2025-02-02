@@ -6,9 +6,9 @@ import {
   boolean,
   uuid,
   pgEnum,
-  AnyPgColumn,
   date,
   unique,
+  integer,
 } from 'drizzle-orm/pg-core';
 import { FCMTokenDeviceEnum, UserGenderEnum } from '@family-tree/shared';
 
@@ -63,20 +63,36 @@ export const familyTreesSchema = pgTable(
   })
 );
 
-export const familyMembersSchema = pgTable('family_members', {
-  name: text('name').notNull(),
-  familyTreeId: uuid('family_tree_id')
-    .references(() => familyTreesSchema.id)
-    .notNull(),
-  userId: uuid('user_id')
-    .references(() => usersSchema.id)
-    .notNull(),
-  parentFamilyTreeId: uuid('parent_id').references(
-    (): AnyPgColumn => familyMembersSchema.id
-  ),
-  spouseId: uuid('spouse_id').references(() => usersSchema.id),
-  ...baseSchema,
-});
+// Closure Table for Family Tree Relationships
+export const familyTreeRelationshipsSchema = pgTable(
+  'family_tree_relationships',
+  {
+    ancestorId: uuid('ancestor_id')
+      .references(() => usersSchema.id)
+      .notNull(),
+    descendantId: uuid('descendant_id')
+      .references(() => usersSchema.id)
+      .notNull(),
+    familyTreeId: uuid('family_tree_id')
+      .references(() => familyTreesSchema.id)
+      .notNull(),
+    depth: integer('depth').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => ({
+    pk: unique('relationship_pk').on(
+      table.ancestorId,
+      table.descendantId,
+      table.familyTreeId
+    ),
+  })
+);
 
 export const FCMTokensSchema = pgTable('fcm_tokens', {
   token: text('token').notNull(),
@@ -90,11 +106,11 @@ export const FCMTokensSchema = pgTable('fcm_tokens', {
 // relations
 export const usersRelations = relations(usersSchema, ({ many }) => ({
   familyTrees: many(familyTreesSchema, { relationName: 'family-tree-creator' }),
-  familyMembers: many(familyMembersSchema, {
-    relationName: 'family-member-parent1',
+  ancestor: many(familyTreeRelationshipsSchema, {
+    relationName: 'family-tree-relationship-ancestor',
   }),
-  familyMembers2: many(familyMembersSchema, {
-    relationName: 'family-member-parent2',
+  descendant: many(familyTreeRelationshipsSchema, {
+    relationName: 'family-tree-relationship-descendant',
   }),
   fcmTokens: many(FCMTokensSchema, { relationName: 'user-fcm-token' }),
 }));
@@ -102,8 +118,8 @@ export const usersRelations = relations(usersSchema, ({ many }) => ({
 export const familyTreesRelations = relations(
   familyTreesSchema,
   ({ one, many }) => ({
-    familyMembers: many(familyMembersSchema, {
-      relationName: 'family-tree-family-member',
+    familyTreeRelationships: many(familyTreeRelationshipsSchema, {
+      relationName: 'family-tree-family-relationship',
     }),
     creator: one(usersSchema, {
       fields: [familyTreesSchema.createdBy],
@@ -113,31 +129,23 @@ export const familyTreesRelations = relations(
   })
 );
 
-export const familyMembersRelations = relations(
-  familyMembersSchema,
-  ({ one, many }) => ({
+export const familyTreeRelationshipsRelations = relations(
+  familyTreeRelationshipsSchema,
+  ({ one }) => ({
     familyTree: one(familyTreesSchema, {
-      fields: [familyMembersSchema.familyTreeId],
+      fields: [familyTreeRelationshipsSchema.familyTreeId],
       references: [familyTreesSchema.id],
-      relationName: 'family-tree-family-member',
+      relationName: 'family-tree-family-relationship',
     }),
-    user: one(usersSchema, {
-      fields: [familyMembersSchema.userId],
+    ancestor: one(usersSchema, {
+      fields: [familyTreeRelationshipsSchema.ancestorId],
       references: [usersSchema.id],
-      relationName: 'family-member-parent1',
+      relationName: 'family-tree-relationship-ancestor',
     }),
-    parentFamilyTree: one(familyMembersSchema, {
-      fields: [familyMembersSchema.parentFamilyTreeId],
-      references: [familyMembersSchema.id],
-      relationName: 'family-member-recursive',
-    }),
-    spouse: one(usersSchema, {
-      fields: [familyMembersSchema.spouseId],
+    descendant: one(usersSchema, {
+      fields: [familyTreeRelationshipsSchema.descendantId],
       references: [usersSchema.id],
-      relationName: 'family-member-parent2',
-    }),
-    childFamilyTree: many(familyMembersSchema, {
-      relationName: 'family-member-recursive',
+      relationName: 'family-tree-relationship-descendant',
     }),
   })
 );
