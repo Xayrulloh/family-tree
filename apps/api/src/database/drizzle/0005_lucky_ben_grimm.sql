@@ -1,0 +1,1 @@
+ALTER TABLE "family_trees" ADD CONSTRAINT "name_and_user_idx" UNIQUE("name","created_by");
