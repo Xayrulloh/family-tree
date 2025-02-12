@@ -16,17 +16,16 @@ import {
   FamilyTreeRelationshipUserArrayResponseDto,
   FamilyTreeRelationshipUserResponseDto,
 } from './dto/family-tree-relationship.dto';
-import {
-  UserGenderEnum,
-  UserResponseType,
-  UserSchemaType,
-} from '@family-tree/shared';
+import { UserGenderEnum, UserResponseType } from '@family-tree/shared';
+import { CloudflareConfig } from '../../config/cloudflare/cloudflare.config';
+import { CLOUDFLARE_USER_FOLDER } from '../../utils/constants';
 
 @Injectable()
 export class FamilyTreeRelationshipService {
   constructor(
     @Inject(DrizzleAsyncProvider)
-    private db: NodePgDatabase<typeof schema>
+    private db: NodePgDatabase<typeof schema>,
+    private cloudflareConfig: CloudflareConfig
   ) {}
 
   // return nested json object
@@ -722,7 +721,7 @@ export class FamilyTreeRelationshipService {
 
       // delete old user image from cloudflare
       if (user.image) {
-        // FIXME: must delete the old image
+        this.cloudflareConfig.deleteFile(CLOUDFLARE_USER_FOLDER, user.image);
       }
 
       // delete old user
@@ -733,8 +732,8 @@ export class FamilyTreeRelationshipService {
       // update other user info
 
       // delete old user image from cloudflare
-      if (body.image !== user.image) {
-        // FIXME: must delete the old image
+      if (user.image && body.image !== user.image) {
+        this.cloudflareConfig.deleteFile(CLOUDFLARE_USER_FOLDER, user.image);
       }
 
       // update user info
