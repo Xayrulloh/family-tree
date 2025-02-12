@@ -5,12 +5,15 @@ import { DrizzleAsyncProvider } from '../../database/drizzle.provider';
 import { UserResponseType } from '@family-tree/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { UserUpdateRequestDto } from './dto/user.dto';
+import { CloudflareConfig } from '../../config/cloudflare/cloudflare.config';
+import { CLOUDFLARE_USER_FOLDER } from '../../utils/constants';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(DrizzleAsyncProvider)
-    private db: NodePgDatabase<typeof schema>
+    private db: NodePgDatabase<typeof schema>,
+    private cloudflareConfig: CloudflareConfig
   ) {}
 
   async getUserByEmail(email: string): Promise<UserResponseType> {
@@ -59,8 +62,8 @@ export class UserService {
       // FIXME: Need to think about related family trees
     }
 
-    if (user.image !== body.image) {
-      // FIXME: must delete the old image
+    if (body.image && user.image !== body.image) {
+      this.cloudflareConfig.deleteFile(CLOUDFLARE_USER_FOLDER, body.image);
     }
 
     await this.db

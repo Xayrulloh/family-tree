@@ -14,12 +14,15 @@ import {
   FamilyTreeResponseDto,
   FamilyTreeUpdateRequestDto,
 } from './dto/family-tree.dto';
+import { CloudflareConfig } from '../../config/cloudflare/cloudflare.config';
+import { CLOUDFLARE_TREE_FOLDER } from '../../utils/constants';
 
 @Injectable()
 export class FamilyTreeService {
   constructor(
     @Inject(DrizzleAsyncProvider)
-    private db: NodePgDatabase<typeof schema>
+    private db: NodePgDatabase<typeof schema>,
+    private cloudflareConfig: CloudflareConfig
   ) {}
 
   async getFamilyTreesOfUser(
@@ -105,8 +108,8 @@ export class FamilyTreeService {
       throw new NotFoundException(`Family tree with id ${id} not found`);
     }
 
-    if (familyTree.image !== body.image) {
-      // FIXME: must delete the old image
+    if (body.image && familyTree.image !== body.image) {
+      this.cloudflareConfig.deleteFile(CLOUDFLARE_TREE_FOLDER, body.image);
     }
 
     await this.db
