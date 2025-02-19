@@ -5,22 +5,21 @@ import * as model from '../model';
 
 export const Auth: React.FC = () => {
   return (
-    <Button
-      type="primary"
-      icon={<GoogleOutlined />}
-      onClick={() => model.googleLoginFx()}
-      style={{
-        width: '200px', // Square button
-        height: '200px',
-        borderRadius: '8px', // Optional: Add rounded corners
-        fontSize: '18px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      Enter using Google
-    </Button>
+    <div className='auth' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%', width: '50%', backgroundColor: 'gray', borderRadius: '8px' }}>
+      <Button
+        type="primary"
+        icon={<GoogleOutlined />}
+        onClick={() => model.googleLoginFx()}
+        style={{
+          width: '200px',
+          height: '50px',
+          borderRadius: '8px',
+          fontSize: '18px',
+          backgroundColor: 'red'
+        }}
+      >
+        Enter using Google
+      </Button>
+    </div>
   );
 };
