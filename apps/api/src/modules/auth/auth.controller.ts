@@ -33,9 +33,10 @@ export class AuthController {
       maxAge: 2592000000, // 30 days
       httpOnly: true,
       // sameSite: 'strict',
-      sameSite: 'none'
+      sameSite: 'none',
+      secure: true,
     });
 
-    res.redirect('http://localhost:8080/docs');
+    res.redirect('http://localhost:4200');
   }
 }
