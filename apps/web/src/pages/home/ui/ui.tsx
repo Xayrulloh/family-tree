@@ -3,7 +3,7 @@ import { factory } from '../model';
 
 const HomePage: React.FC = () => {
   return (
-    <div>
+    <div style={{ backgroundImage: "url('../../public/family-tree.jpg')", backgroundSize: 'cover', height: '100vh' }}>
       <Home />
     </div>
   );
