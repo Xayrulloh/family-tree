@@ -1,7 +1,7 @@
 import * as userModel from '../../users/model'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useUnit } from 'effector-react';
-import { Typography, Avatar, Input, Select, DatePicker, Button, message } from 'antd';
+import { Typography, Avatar, Input, Select, DatePicker, Button, message, Upload } from 'antd';
 import { UserGenderEnum, UserResponseType } from '@family-tree/shared';
 import dayjs from 'dayjs';
 
@@ -18,6 +18,13 @@ export const Profile: React.FC = () => {
   // State for editable fields
   const [editedUser, setEditedUser] = useState<UserResponseType | null>(null);
 
+  // State for image file
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Ref to store the original user data for comparison
+  const originalUserRef = useRef<UserResponseType | null>(null)
+
+  // Fetch user data on mount
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
@@ -39,40 +46,97 @@ export const Profile: React.FC = () => {
     }
   };
 
-  
-  // Handle save
-  const handleSave = async () => {
-    console.log('🚀 ~ handleSave ~ editedUser:', editedUser)
-    if (!editedUser) return;
-
-    try {
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editedUser),
-        credentials: 'include',
-      });
-
-      if (response.status === 204) {
-        message.success('Profile updated successfully');
-        setIsEditing(false);
-        fetchUser(); // Refetch user data to update the UI
-      } else {
-        throw new Error('Failed to update profile');
-      }
-    } catch (error) {
-      message.error('Failed to update profile');
-      console.error(error);
-    }
+  // Handle image upload
+  const handleImageUpload = (file: File) => {
+    setImageFile(file);
+    return false; // Prevent default upload behavior
   };
+
+  // Check if user data has changed
+  const hasChanges = () => {
+    if (!editedUser || !originalUserRef.current) return false;
+
+    // Compare each field
+    const fields: (keyof UserResponseType)[] = ['name', 'gender', 'birthdate', 'deathdate'];
+
+    for (const field of fields) {
+      if (editedUser[field] !== originalUserRef.current[field]) {
+        return true;
+      }
+    }
+
+    // Check if a new image has been uploaded
+    if (imageFile) {
+      return true;
+    }
+
+    return false;
+  };
+
+// Handle save
+const handleSave = async () => {
+  if (!editedUser || !hasChanges()) {
+    message.info('No changes to save');
+    return;
+  }
+
+  try {
+    const imageUrl = editedUser.image;
+
+    // Upload image to Cloudflare R2 if a new image is selected
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+
+      console.log('Uploading image...');
+      // upload file
+      // const uploadResponse = await fetch('/api/upload-image', {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+
+      // if (!uploadResponse.ok) {
+      //   throw new Error('Failed to upload image');
+      // }
+
+      // const { url } = await uploadResponse.json();
+      // imageUrl = url;
+    }
+
+    // Prepare the updated user data
+    const updatedUser = {
+      ...editedUser,
+      image: imageUrl,
+    };
+
+    // Send PUT request to update user data
+    const updateResponse = await fetch('/users', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedUser),
+      credentials: 'include',
+    });
+
+    if (updateResponse.status === 204) {
+      message.success('Profile updated successfully');
+      setIsEditing(false);
+      fetchUser(); // Refetch user data to update the UI
+    } else {
+      throw new Error('Failed to update profile');
+    }
+  } catch (error) {
+    message.error('Failed to update profile');
+    console.error(error);
+  }
+};
 
   // Handle cancel
   const handleCancel = () => {
     setIsEditing(false);
-    setEditedUser(user); // Reset to original user data
+    setEditedUser(originalUserRef.current); // Reset to original user data
+    setImageFile(null); // Clear the uploaded image
   };
 
   if (!user || !editedUser) {
@@ -95,7 +159,17 @@ export const Profile: React.FC = () => {
       }}
     >
       {/* Avatar */}
-      <Avatar size={200} src={editedUser.image || ''} />
+      {isEditing ? (
+        <Upload
+          beforeUpload={handleImageUpload}
+          showUploadList={false}
+          accept="image/*"
+        >
+          <Avatar size={200} src={imageFile ? URL.createObjectURL(imageFile) : editedUser.image} />
+        </Upload>
+      ) : (
+        <Avatar size={200} src={editedUser.image || ''} />
+      )}
 
       {/* Editable Fields */}
       <div style={{ marginTop: '40px', paddingTop: '20px' }}>
