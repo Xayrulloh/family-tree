@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useUnit } from 'effector-react';
 import showProfile from '../model';
 import { Profile } from '../../profile';
+import { FamilyTree } from '../../family-tree';
 
 export const Home: React.FC = () => {
   const fetchUser = useUnit(userModel.fetchUserFx);
@@ -51,6 +52,7 @@ export const Home: React.FC = () => {
         }}
       >
         {profileClicked && user && <Profile />}
+        {!profileClicked && <FamilyTree />}
       </main>
     </div>
   );
