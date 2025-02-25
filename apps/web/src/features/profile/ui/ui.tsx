@@ -42,6 +42,7 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     if (user) {
       setEditedUser(user);
+      originalUserRef.current = user;
     }
   }, [user]);
 
@@ -98,26 +99,29 @@ export const Profile: React.FC = () => {
     }
 
     try {
-      const imageUrl = editedUser.image;
+      let imageUrl = editedUser.image;
 
       // Upload image to Cloudflare R2 if a new image is selected
       if (imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
 
-        console.log('Uploading image...');
         // upload file
-        // const uploadResponse = await fetch('/api/upload-image', {
-        //   method: 'POST',
-        //   body: formData,
-        // });
+        const uploadResponse = await fetch(import.meta.env.VITE_API_URL + '/file/avatar', {
+          method: 'POST',
+          body: formData,
+        });
 
-        // if (!uploadResponse.ok) {
-        //   throw new Error('Failed to upload image');
-        // }
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image');
+        }
 
-        // const { url } = await uploadResponse.json();
-        // imageUrl = url;
+        const { key, message } = await uploadResponse.json();
+
+        console.log('🚀 ~ handleSave ~ message:', message)
+        console.log('🚀 ~ handleSave ~ key:', key)
+
+        imageUrl = key;
       }
 
       // Prepare the updated user data
@@ -125,9 +129,10 @@ export const Profile: React.FC = () => {
         ...editedUser,
         image: imageUrl,
       };
+      console.log('🚀 ~ handleSave ~ updatedUser:', updatedUser)
 
       // Send PUT request to update user data
-      const updateResponse = await fetch('/users', {
+      const updateResponse = await fetch(import.meta.env.VITE_API_URL + '/users', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
