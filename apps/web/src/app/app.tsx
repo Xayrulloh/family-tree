@@ -3,7 +3,7 @@ import { router } from '../shared/config/routing';
 import { RouterProvider } from 'atomic-router-react';
 import './model';
 import { Routing } from '../pages';
-import { ConfigProvider } from 'antd'
+import { ConfigProvider } from 'antd';
 
 appStarted();
 

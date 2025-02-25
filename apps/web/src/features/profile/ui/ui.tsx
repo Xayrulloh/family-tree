@@ -1,7 +1,16 @@
-import * as userModel from '../../users/model'
+import * as userModel from '../../users/model';
 import { useEffect, useRef, useState } from 'react';
 import { useUnit } from 'effector-react';
-import { Typography, Avatar, Input, Select, DatePicker, Button, message, Upload } from 'antd';
+import {
+  Typography,
+  Avatar,
+  Input,
+  Select,
+  DatePicker,
+  Button,
+  message,
+  Upload,
+} from 'antd';
 import { UserGenderEnum, UserResponseType } from '@family-tree/shared';
 import dayjs from 'dayjs';
 
@@ -22,7 +31,7 @@ export const Profile: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Ref to store the original user data for comparison
-  const originalUserRef = useRef<UserResponseType | null>(null)
+  const originalUserRef = useRef<UserResponseType | null>(null);
 
   // Fetch user data on mount
   useEffect(() => {
@@ -37,7 +46,10 @@ export const Profile: React.FC = () => {
   }, [user]);
 
   // Handle input changes
-  const handleInputChange = (field: keyof UserResponseType, value: string | dayjs.Dayjs) => {
+  const handleInputChange = (
+    field: keyof UserResponseType,
+    value: string | dayjs.Dayjs
+  ) => {
     if (editedUser) {
       setEditedUser({
         ...editedUser,
@@ -57,7 +69,12 @@ export const Profile: React.FC = () => {
     if (!editedUser || !originalUserRef.current) return false;
 
     // Compare each field
-    const fields: (keyof UserResponseType)[] = ['name', 'gender', 'birthdate', 'deathdate'];
+    const fields: (keyof UserResponseType)[] = [
+      'name',
+      'gender',
+      'birthdate',
+      'deathdate',
+    ];
 
     for (const field of fields) {
       if (editedUser[field] !== originalUserRef.current[field]) {
@@ -73,64 +90,64 @@ export const Profile: React.FC = () => {
     return false;
   };
 
-// Handle save
-const handleSave = async () => {
-  if (!editedUser || !hasChanges()) {
-    message.info('No changes to save');
-    return;
-  }
-
-  try {
-    const imageUrl = editedUser.image;
-
-    // Upload image to Cloudflare R2 if a new image is selected
-    if (imageFile) {
-      const formData = new FormData();
-      formData.append('file', imageFile);
-
-      console.log('Uploading image...');
-      // upload file
-      // const uploadResponse = await fetch('/api/upload-image', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-
-      // if (!uploadResponse.ok) {
-      //   throw new Error('Failed to upload image');
-      // }
-
-      // const { url } = await uploadResponse.json();
-      // imageUrl = url;
+  // Handle save
+  const handleSave = async () => {
+    if (!editedUser || !hasChanges()) {
+      message.info('No changes to save');
+      return;
     }
 
-    // Prepare the updated user data
-    const updatedUser = {
-      ...editedUser,
-      image: imageUrl,
-    };
+    try {
+      const imageUrl = editedUser.image;
 
-    // Send PUT request to update user data
-    const updateResponse = await fetch('/users', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedUser),
-      credentials: 'include',
-    });
+      // Upload image to Cloudflare R2 if a new image is selected
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('file', imageFile);
 
-    if (updateResponse.status === 204) {
-      message.success('Profile updated successfully');
-      setIsEditing(false);
-      fetchUser(); // Refetch user data to update the UI
-    } else {
-      throw new Error('Failed to update profile');
+        console.log('Uploading image...');
+        // upload file
+        // const uploadResponse = await fetch('/api/upload-image', {
+        //   method: 'POST',
+        //   body: formData,
+        // });
+
+        // if (!uploadResponse.ok) {
+        //   throw new Error('Failed to upload image');
+        // }
+
+        // const { url } = await uploadResponse.json();
+        // imageUrl = url;
+      }
+
+      // Prepare the updated user data
+      const updatedUser = {
+        ...editedUser,
+        image: imageUrl,
+      };
+
+      // Send PUT request to update user data
+      const updateResponse = await fetch('/users', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+        credentials: 'include',
+      });
+
+      if (updateResponse.status === 204) {
+        message.success('Profile updated successfully');
+        setIsEditing(false);
+        fetchUser(); // Refetch user data to update the UI
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      message.error('Failed to update profile');
+      console.error(error);
     }
-  } catch (error) {
-    message.error('Failed to update profile');
-    console.error(error);
-  }
-};
+  };
 
   // Handle cancel
   const handleCancel = () => {
@@ -165,7 +182,10 @@ const handleSave = async () => {
           showUploadList={false}
           accept="image/*"
         >
-          <Avatar size={200} src={imageFile ? URL.createObjectURL(imageFile) : editedUser.image} />
+          <Avatar
+            size={200}
+            src={imageFile ? URL.createObjectURL(imageFile) : editedUser.image}
+          />
         </Upload>
       ) : (
         <Avatar size={200} src={editedUser.image || ''} />
@@ -185,7 +205,9 @@ const handleSave = async () => {
         )}
 
         {/* Email (Non-editable) */}
-        <Paragraph style={{ color: 'white' }}>Email: {editedUser.email}</Paragraph>
+        <Paragraph style={{ color: 'white' }}>
+          Email: {editedUser.email}
+        </Paragraph>
 
         {/* Gender */}
         {isEditing ? (
@@ -199,14 +221,21 @@ const handleSave = async () => {
             <Option value={UserGenderEnum.FEMALE}>Female</Option>
           </Select>
         ) : (
-          <Paragraph style={{ color: 'white' }}>Gender: {editedUser.gender}</Paragraph>
+          <Paragraph style={{ color: 'white' }}>
+            Gender: {editedUser.gender}
+          </Paragraph>
         )}
 
         {/* Birthdate */}
         {isEditing ? (
           <DatePicker
             value={editedUser.birthdate ? dayjs(editedUser.birthdate) : null}
-            onChange={(date) => handleInputChange('birthdate', date ? date.format('YYYY-MM-DD') : '')}
+            onChange={(date) =>
+              handleInputChange(
+                'birthdate',
+                date ? date.format('YYYY-MM-DD') : ''
+              )
+            }
             style={{ width: '100%', marginBottom: '16px' }}
           />
         ) : (
@@ -219,7 +248,12 @@ const handleSave = async () => {
         {isEditing ? (
           <DatePicker
             value={editedUser.deathdate ? dayjs(editedUser.deathdate) : null}
-            onChange={(date) => handleInputChange('deathdate', date ? date.format('YYYY-MM-DD') : '')}
+            onChange={(date) =>
+              handleInputChange(
+                'deathdate',
+                date ? date.format('YYYY-MM-DD') : ''
+              )
+            }
             style={{ width: '100%', marginBottom: '16px' }}
           />
         ) : (
@@ -232,7 +266,11 @@ const handleSave = async () => {
       {/* Buttons */}
       {isEditing ? (
         <div>
-          <Button type="primary" onClick={handleSave} style={{ marginRight: '8px' }}>
+          <Button
+            type="primary"
+            onClick={handleSave}
+            style={{ marginRight: '8px' }}
+          >
             Save
           </Button>
           <Button onClick={handleCancel}>Cancel</Button>
