@@ -1,7 +1,12 @@
+import { Home } from '../../../features/home';
 import { factory } from '../model';
 
-export const HomePage: React.FC = () => {
-  return <h1>Home</h1>;
+const HomePage: React.FC = () => {
+  return (
+    <div>
+      <Home />
+    </div>
+  );
 };
 
 export const component = HomePage;
