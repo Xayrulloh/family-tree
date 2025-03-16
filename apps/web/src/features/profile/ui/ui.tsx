@@ -107,7 +107,7 @@ export const Profile: React.FC = () => {
         formData.append('file', imageFile);
 
         // upload file
-        const uploadResponse = await fetch(import.meta.env.VITE_API_URL + '/file/avatar', {
+        const uploadResponse = await fetch(`${import.meta.env.VITE_API_URL}/file/avatar`, {
           method: 'POST',
           body: formData,
         });
@@ -132,7 +132,7 @@ export const Profile: React.FC = () => {
       console.log('🚀 ~ handleSave ~ updatedUser:', updatedUser)
 
       // Send PUT request to update user data
-      const updateResponse = await fetch(import.meta.env.VITE_API_URL + '/users', {
+      const updateResponse = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
