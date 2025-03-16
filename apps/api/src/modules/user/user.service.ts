@@ -7,6 +7,8 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { UserUpdateRequestDto } from './dto/user.dto';
 import { CloudflareConfig } from '../../config/cloudflare/cloudflare.config';
 import { CLOUDFLARE_USER_FOLDER } from '../../utils/constants';
+import { env } from '../../config/env/env';
+// import { env } from './config/env/env';
 
 @Injectable()
 export class UserService {
@@ -43,6 +45,10 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
+    if (user.image && !user.image.startsWith('http')) {
+      user.image = `${env().CLOUDFLARE_URL}/avatar/${user.image}`;
+    }
+
     return user;
   }
 
@@ -62,8 +68,8 @@ export class UserService {
       // FIXME: Need to think about related family trees
     }
 
-    if (body.image && user.image !== body.image) {
-      this.cloudflareConfig.deleteFile(CLOUDFLARE_USER_FOLDER, body.image);
+    if (user.image && user.image !== body.image) {
+      this.cloudflareConfig.deleteFile(CLOUDFLARE_USER_FOLDER, user.image);
     }
 
     await this.db

@@ -33,7 +33,7 @@ export class CloudflareConfig {
       ContentType: 'image/jpeg',
     });
 
-    await this.s3.send(command);
+    await this.s3.send(command).catch((err) => console.log(err));
   }
 
   async deleteFile(folder: string, key: string): Promise<void> {
@@ -42,6 +42,6 @@ export class CloudflareConfig {
       Key: folder + key,
     });
 
-    await this.s3.send(command);
+    await this.s3.send(command).catch((err) => console.log(err));
   }
 }

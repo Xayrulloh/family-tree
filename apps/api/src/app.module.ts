@@ -10,6 +10,7 @@ import { UserModule } from './modules/user/user.module';
 import { FamilyTreeModule } from './modules/family-tree/family-tree.module';
 import { FamilyTreeRelationshipModule } from './modules/family-tree-relationship/family-tree-relationship.module';
 import { ZodSerializerInterceptorCustom } from './common/interceptors/zod.response.interceptor';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ZodSerializerInterceptorCustom } from './common/interceptors/zod.respon
     FCMTokenModule,
     FamilyTreeModule,
     FamilyTreeRelationshipModule,
+    FileModule
   ],
   controllers: [],
   providers: [
