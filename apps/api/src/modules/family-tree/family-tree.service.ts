@@ -39,7 +39,7 @@ export class FamilyTreeService {
     return this.db.query.familyTreesSchema.findMany({
       where: and(
         ilike(schema.familyTreesSchema.name, `%${name}%`),
-        eq(schema.familyTreesSchema.visibility, true),
+        eq(schema.familyTreesSchema.public, true),
         isNull(schema.familyTreesSchema.deletedAt)
       ),
       limit: 5,
@@ -84,7 +84,7 @@ export class FamilyTreeService {
         createdBy: userId,
         name: body.name,
         image: body.image,
-        visibility: body.visibility || false,
+        public: body.public || false,
       })
       .returning();
 
@@ -117,7 +117,7 @@ export class FamilyTreeService {
       .set({
         name: body.name,
         image: body.image,
-        visibility: body.visibility || false,
+        public: body.public || false,
       })
       .where(eq(schema.familyTreesSchema.id, id));
   }

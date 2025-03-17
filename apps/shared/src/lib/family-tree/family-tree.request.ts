@@ -4,7 +4,7 @@ import { FamilyTreeSchema } from '../schema';
 const FamilyTreeCreateRequestSchema = FamilyTreeSchema.pick({
   image: true,
   name: true,
-  visibility: true,
+  public: true,
 });
 
 const FamilyTreeUpdateRequestSchema = FamilyTreeCreateRequestSchema.partial();
