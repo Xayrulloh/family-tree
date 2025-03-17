@@ -9,6 +9,7 @@ import { JwtPayloadType, UserSchemaType } from '@family-tree/shared';
 import { Request } from 'express';
 import { COOKIES_ACCESS_TOKEN_KEY } from '../../utils/constants';
 import { and, eq, isNull } from 'drizzle-orm';
+import { EnvType } from '../../config/env/env-validation';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -29,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     super({
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET')!,
+      secretOrKey: configService.get<EnvType['JWT_SECRET']>('JWT_SECRET') as string,
       jwtFromRequest: extractJwtFromCookie,
     });
   }

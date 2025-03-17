@@ -10,10 +10,10 @@ export class FileService {
     key: string,
     fileBuffer: Buffer
   ): Promise<void> {
-    await this.cloudflareConfig.uploadFile(folder + '/', key, fileBuffer);
+    await this.cloudflareConfig.uploadFile(folder, key, fileBuffer);
   }
 
   async deleteFile(folder: string, key: string): Promise<void> {
-    await this.cloudflareConfig.deleteFile(folder + '/', key);
+    await this.cloudflareConfig.deleteFile(folder, key);
   }
 }

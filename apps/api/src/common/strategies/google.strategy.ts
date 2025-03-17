@@ -7,6 +7,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../../database/schema';
 import { GoogleProfileType, UserGenderEnum } from '@family-tree/shared';
 import { and, eq, isNull } from 'drizzle-orm';
+import { EnvType } from '../../config/env/env-validation';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -16,9 +17,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private db: NodePgDatabase<typeof schema>
   ) {
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID')!,
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL')!,
+      clientID: configService.get<EnvType['GOOGLE_CLIENT_ID']>('GOOGLE_CLIENT_ID') as string,
+      clientSecret: configService.get<EnvType['GOOGLE_CLIENT_SECRET']>('GOOGLE_CLIENT_SECRET') as string,
+      callbackURL: configService.get<EnvType['GOOGLE_CALLBACK_URL']>('GOOGLE_CALLBACK_URL') as string,
       scope: ['profile', 'email'],
     });
   }
