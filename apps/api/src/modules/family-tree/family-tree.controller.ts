@@ -59,7 +59,7 @@ export class FamilyTreeController {
     return this.familyTreeService.getFamilyTreesOfUser(req.user!.id);
   }
 
-  // Find family trees by name (only public [visibility = true]) only 10 of them (name length must be at least 3)
+  // Find family trees by name (only public [public = true]) only 10 of them (name length must be at least 3)
   @Get('public/:name')
   @UseGuards(JWTAuthGuard)
   @ApiCookieAuth(COOKIES_ACCESS_TOKEN_KEY)

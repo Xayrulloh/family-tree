@@ -460,7 +460,7 @@ export class FamilyTreeRelationshipService {
       body.targetUserId
     );
 
-    if (parentOfTargetUser) {
+    if (parentOfTargetUser.length) {
       throw new BadRequestException(`User already has parent`);
     }
 
@@ -825,7 +825,7 @@ export class FamilyTreeRelationshipService {
       where: and(
         eq(schema.familyTreeRelationshipsSchema.familyTreeId, familyTreeId),
         eq(schema.familyTreeRelationshipsSchema.depth, 1),
-        eq(schema.familyTreeRelationshipsSchema.descendantId, targetUserId)
+        targetUserId ? eq(schema.familyTreeRelationshipsSchema.descendantId, targetUserId) : undefined
       ),
     });
 

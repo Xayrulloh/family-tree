@@ -55,7 +55,7 @@ export const familyTreesSchema = pgTable(
       .references(() => usersSchema.id)
       .notNull(),
     image: text('image'),
-    visibility: boolean('visibility').default(false).notNull(),
+    public: boolean('public').default(false).notNull(),
     ...baseSchema,
   },
   (table) => ({
