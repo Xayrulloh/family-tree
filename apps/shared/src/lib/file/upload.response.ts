@@ -6,7 +6,7 @@ const FileDeleteResponseSchema = z.object({
 
 const FileUploadResponseSchema = z.object({
   message: z.string().min(1),
-  key: z.string().min(1),
+  path: z.string().min(1),
 });
 
 type FileDeleteResponseType = z.infer<typeof FileDeleteResponseSchema>;
