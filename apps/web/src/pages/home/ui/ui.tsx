@@ -1,7 +1,19 @@
+import { Link } from 'atomic-router-react';
 import { factory } from '../model';
+import { routes } from '../../../shared/config/routing';
 
-export const HomePage: React.FC = () => {
-  return <h1>Home</h1>;
+const HomePage: React.FC = () => {
+  return (
+    <div
+      style={{
+        // backgroundImage: "url('/family-tree.jpg')",
+        backgroundSize: 'cover',
+        height: '100vh',
+      }}
+    >
+      <Link to={routes.trees}>Family trees</Link>
+    </div>
+  );
 };
 
 export const component = HomePage;

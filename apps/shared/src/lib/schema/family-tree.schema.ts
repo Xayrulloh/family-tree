@@ -11,7 +11,7 @@ const FamilyTreeSchema = z
       .describe(
         'Image url which comes only from client side but may delete from back on updates'
       ),
-    visibility: z
+    public: z
       .boolean()
       .default(false)
       .nullable()

@@ -32,9 +32,11 @@ export class AuthController {
     res.cookie(COOKIES_ACCESS_TOKEN_KEY, token, {
       maxAge: 2592000000, // 30 days
       httpOnly: true,
-      sameSite: 'strict',
+      // sameSite: 'strict',
+      sameSite: 'none',
+      secure: true,
     });
 
-    res.redirect('http://localhost:8080/docs');
+    res.redirect('http://localhost:4200');
   }
 }

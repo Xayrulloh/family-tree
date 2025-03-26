@@ -8,7 +8,6 @@ import {
   Put,
   Req,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {

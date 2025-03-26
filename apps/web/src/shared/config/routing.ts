@@ -7,6 +7,8 @@ import {
 export const routes = {
   browse: createRoute(),
   notFound: createRoute(),
+  registration: createRoute(),
+  trees: createRoute(),
 };
 
 export const routesMap = [
@@ -17,6 +19,14 @@ export const routesMap = [
   {
     route: routes.notFound,
     path: '/404',
+  },
+  {
+    path: '/register',
+    route: routes.registration,
+  },
+  {
+    path: '/family-trees',
+    route: routes.trees,
   },
 ];
 
