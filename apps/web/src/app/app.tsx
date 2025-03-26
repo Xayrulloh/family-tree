@@ -9,7 +9,7 @@ appStarted();
 
 export const App: React.FC = () => {
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: 'rgb(22, 222, 49)' } }}>
+    <ConfigProvider theme={{ token: {  } }}>
       <RouterProvider router={router}>
         <Routing />
       </RouterProvider>

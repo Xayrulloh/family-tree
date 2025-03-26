@@ -1,5 +1,5 @@
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Flex, Input, Modal, theme, Upload } from 'antd';
+import { Button, Flex, Input, Modal, Switch, theme, Upload } from 'antd';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import * as model from './model';
@@ -7,7 +7,6 @@ import { useUnit } from 'effector-react';
 import { useId, useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { FieldWrapper } from '../../../shared/ui/field-wrapper';
-import { getImage } from '../../../shared/lib/get-image';
 
 export const CreateTree: React.FC = () => {
   const [isOpen] = useUnit([model.disclosure.$isOpen]);
@@ -41,6 +40,7 @@ export const CreateTree: React.FC = () => {
             id={id}
           >
             <Flex vertical gap={token.size}>
+              {/* Name Field */}
               <Controller
                 control={form.control}
                 name="name"
@@ -57,9 +57,30 @@ export const CreateTree: React.FC = () => {
                   </FieldWrapper>
                 )}
               />
+              {/* Public/Private Toggle */}
+              <Controller
+                control={form.control}
+                name="public"
+                render={({ field }) => (
+                  <FieldWrapper
+                    label="Public"
+                    isError={!!form.formState.errors['public']?.message}
+                    message={form.formState.errors['public']?.message}
+                  >
+                    <Switch
+                      checkedChildren="Public"
+                      unCheckedChildren="Private"
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FieldWrapper>
+                )}
+              />
+              {/* Image Upload */}
               <Upload
+                accept='image/*'
                 action={async (file) => {
-                  const res = await model.uploadFileFx(file);
+                  await model.uploadFileFx(file);
                   const img = URL.createObjectURL(file);
                   setImg(img);
                   return img;
@@ -67,7 +88,7 @@ export const CreateTree: React.FC = () => {
               >
                 <Button icon={<UploadOutlined />}>Upload</Button>
               </Upload>
-              <img src={img} />
+              <img src={img} alt='Family Tree' />
             </Flex>
           </form>
         </FormProvider>
