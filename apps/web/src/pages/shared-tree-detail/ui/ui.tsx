@@ -1,14 +1,11 @@
-import type { SharedFamilyTreeResponseType } from '@family-tree/shared';
+import type { FamilyTreeSharedResponseType } from '@family-tree/shared';
 import { api } from '~/shared/api';
 import type { LazyPageFactoryParams } from '~/shared/lib/lazy-page';
-import {
-  createTreeDetailModel,
-  TreeDetailView,
-} from '~/widgets/tree-visualization';
+import { createTreeDetailModel } from '~/widgets/tree-visualization';
 
 // SHARED view — /shared path, permissions from the RBAC flags on the record.
 export const createModel = ({ route }: LazyPageFactoryParams<{ id: string }>) =>
-  createTreeDetailModel<SharedFamilyTreeResponseType>({
+  createTreeDetailModel<FamilyTreeSharedResponseType>({
     route,
     scope: 'shared',
     requireAuth: true,
@@ -22,4 +19,4 @@ export const createModel = ({ route }: LazyPageFactoryParams<{ id: string }>) =>
     getName: (tree) => tree.name,
   });
 
-export const component = TreeDetailView;
+export { TreeDetailView as component } from '~/widgets/tree-visualization';

@@ -11,7 +11,10 @@
     "drizzle:studio": "nx run api:db:studio",
     "check:lint": "nx affected --target=lint",
     "check:format": "nx affected --target=format",
-    "scan": "nx affected -t scan"
+    "scan": "nx affected -t scan",
+    "test:unit": "nx run-many -t test --all",
+    "test:integration": "nx run-many -t test-integration --all",
+    "test:e2e": "nx run-many -t test-e2e --all"
   },
   "private": true,
   "dependencies": {

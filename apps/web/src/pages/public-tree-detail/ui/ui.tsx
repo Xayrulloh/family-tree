@@ -1,10 +1,7 @@
 import type { FamilyTreeResponseType } from '@family-tree/shared';
 import { api } from '~/shared/api';
 import type { LazyPageFactoryParams } from '~/shared/lib/lazy-page';
-import {
-  createTreeDetailModel,
-  TreeDetailView,
-} from '~/widgets/tree-visualization';
+import { createTreeDetailModel } from '~/widgets/tree-visualization';
 
 // PUBLIC view — /public path, read-only, open to anonymous visitors.
 export const createModel = ({ route }: LazyPageFactoryParams<{ id: string }>) =>
@@ -22,4 +19,4 @@ export const createModel = ({ route }: LazyPageFactoryParams<{ id: string }>) =>
     getName: (tree) => tree.name,
   });
 
-export const component = TreeDetailView;
+export { TreeDetailView as component } from '~/widgets/tree-visualization';

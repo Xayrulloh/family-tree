@@ -92,6 +92,18 @@
         "command": "drizzle-kit studio",
         "cwd": "apps/api"
       }
+    },
+    "test-integration": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/api/jest.integration.config.ts"
+      }
+    },
+    "test-e2e": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/api/jest.e2e.config.ts"
+      }
     }
   }
 }

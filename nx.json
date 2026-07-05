@@ -1,10 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -13,9 +10,7 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/.github/workflows/ci.yml"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
   "plugins": [
     {
@@ -31,9 +26,7 @@
           "watchDepsName": "watch-deps"
         }
       },
-      "exclude": [
-        "libs/shared/*"
-      ]
+      "exclude": ["libs/shared/*"]
     },
     {
       "plugin": "@nx/rspack/plugin",
@@ -48,9 +41,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": [
-        "apps/api-e2e/**/*"
-      ]
+      "exclude": ["apps/api-e2e/**/*"]
     },
     {
       "plugin": "@nx/vite/plugin",
@@ -64,9 +55,7 @@
     },
     {
       "plugin": "@nx/js/typescript",
-      "include": [
-        "apps/shared/*"
-      ],
+      "include": ["apps/shared/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"

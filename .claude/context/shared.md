@@ -32,6 +32,8 @@ libs/shared/src/lib/
 ```ts
 BaseSchema = { id: uuid, createdAt: string, updatedAt: string, deletedAt: string | null }
 ```
+Timestamps use a `dateToString` preprocess that normalizes Date objects / ISO strings to Z-suffixed ISO strings. **Invalid dates pass through unchanged** so the datetime validator rejects them as a validation failure — do not "simplify" back to an unguarded `new Date(val).toISOString()`, which made `safeParse()` throw `RangeError` (fixed 2026-07-06).
+Uses Zod 4 top-level APIs: `z.iso.datetime()` and `z.uuid()` — the `z.string().datetime()` / `z.string().uuid()` forms are deprecated (SonarQube S1874 flags them). Note `z.uuid()` validates version/variant bits, so test fixture UUIDs must be well-formed v4 (e.g. `...-4...-8...`).
 
 ### `user.schema.ts`
 ```ts

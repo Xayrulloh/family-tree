@@ -51,7 +51,36 @@ The test: Every changed line should trace directly to the user's request.
 - The only triggers that authorize a commit are: the user running `/git-save`, or a direct instruction like "commit this" / "create a commit".
 - After completing code changes, stop. Report what you did. Wait for the user to decide if/when to commit.
 
-## 5. Goal-Driven Execution
+## 5. Always Write Tests
+
+**Every code change ships with the test that proves it works.**
+
+| Change type | Minimum required test |
+|---|---|
+| New feature / endpoint / page | Unit test for the core logic + integration test for the happy path |
+| Bug fix | A test that would have caught the bug (write it first, watch it fail, then fix) |
+| Refactor | Confirm existing tests still pass; add any missing coverage exposed by the refactor |
+| Config / tooling only | No test needed — state explicitly why |
+
+**Which tier to use:**
+- **Unit** — pure logic, no I/O: Jest (`apps/api`) · Vitest (`apps/web`, `libs/shared`)
+- **Integration** — cross-boundary: API (Jest + Testcontainers real Postgres) · Web (Vitest + MSW + Effector `fork`)
+- **E2E** — user-visible flows: API (supertest) · Web (Playwright, all API calls mocked via `page.route()`)
+
+**How to run:**
+```
+pnpm test:unit          # unit tests for all packages
+pnpm test:integration   # integration tests for all packages
+pnpm test:e2e           # E2E tests for all packages
+```
+
+**Rules:**
+- Place the test file next to the file it tests (`foo.ts` → `foo.spec.ts`).
+- Follow AAA layout: blank line before the act, blank line before the first `expect()`.
+- Run the relevant tier locally before reporting the task done.
+- If a test is genuinely impossible or disproportionate, say so explicitly — don't silently skip.
+
+## 6. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 

@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@family-tree/shared": "workspace:*"
+    "@family-tree/shared": "workspace:*",
+    "@playwright/test": "^1.61.1",
+    "msw": "^2.14.6"
   },
   "nx": {
     "targets": {
@@ -25,6 +27,20 @@
         "executor": "nx:run-commands",
         "options": {
           "command": "sonar",
+          "cwd": "apps/web"
+        }
+      },
+      "test-integration": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "vitest run --config vitest.integration.config.ts",
+          "cwd": "apps/web"
+        }
+      },
+      "test-e2e": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "playwright test",
           "cwd": "apps/web"
         }
       }

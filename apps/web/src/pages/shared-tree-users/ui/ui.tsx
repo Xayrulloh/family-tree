@@ -1,5 +1,5 @@
 import { SearchOutlined } from '@ant-design/icons';
-import type { SharedFamilyTreeUserResponseType } from '@family-tree/shared';
+import type { FamilyTreeSharedUserResponseType } from '@family-tree/shared';
 import {
   Avatar,
   Button,
@@ -19,7 +19,7 @@ import type React from 'react';
 import { editSharedTreeModel } from '~/features/shared-tree-users/edit';
 import type { LazyPageProps } from '~/shared/lib/lazy-page';
 import { PageLoading } from '~/shared/ui/loading';
-import { factory } from '../model';
+import type { factory } from '../model';
 
 const { Title, Text } = Typography;
 
@@ -50,7 +50,7 @@ const SharedTreeUsers: React.FC<Props> = ({ model }) => {
     return <PageLoading />;
   }
 
-  const columns: ColumnsType<SharedFamilyTreeUserResponseType> = [
+  const columns: ColumnsType<FamilyTreeSharedUserResponseType> = [
     {
       title: 'User',
       key: 'name',
@@ -156,7 +156,7 @@ const SharedTreeUsers: React.FC<Props> = ({ model }) => {
                 Shared Users
               </Title>
               <Tag
-                bordered={false}
+                variant="filled"
                 style={{
                   margin: 0,
                   borderRadius: '12px',
@@ -211,4 +211,4 @@ const SharedTreeUsers: React.FC<Props> = ({ model }) => {
 };
 
 export const component = SharedTreeUsers;
-export const createModel = factory;
+export { factory as createModel } from '../model';

@@ -1,6 +1,7 @@
 Stage all changes and commit them with an appropriate Conventional Commit message based on what was done this session.
 
 Steps:
+0. Run `pnpm check:lint` if there's any lint errors, if so run `pnpm check:format` to fix them.
 1. Run `git branch --show-current`. If it's `main`, warn the user and ask whether to create a new branch before committing (never commit straight to `main`).
 2. Run `git status` and `git diff HEAD` (plus `git diff --staged`) to see exactly what changed — both staged and unstaged.
 3. Run `git log --oneline -5` to match the repo's existing commit-message style.

@@ -34,7 +34,19 @@ jobs:
       - name: Run Checks/Lint/Build
         run: npx nx affected -t lint build
 
-      # - name: Code Analysis
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   run: npx nx affected -t scan --parallel 1
+      - name: Run unit tests with coverage
+        run: pnpm exec nx run-many -t test --all --coverage --passWithNoTests
+
+      - name: Run integration tests
+        run: pnpm exec nx affected -t test-integration
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @family-tree/web exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm exec nx affected -t test-e2e
+
+      - name: Code Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: pnpm exec nx affected -t scan --parallel 1
