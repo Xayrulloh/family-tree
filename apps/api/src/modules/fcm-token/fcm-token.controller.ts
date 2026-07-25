@@ -19,12 +19,10 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import { JWTAuthGuard } from '~/common/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '~/shared/types/request-with-user';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FCMTokenCreateDeleteRequestDto,
   FCMTokenResponseDto,
 } from './dto/fcm-token.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FCMTokenService } from './fcm-token.service';
 
 @ApiTags('FCM Token')

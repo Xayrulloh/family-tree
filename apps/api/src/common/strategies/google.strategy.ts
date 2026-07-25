@@ -4,7 +4,6 @@ import {
   type UserSchemaType,
 } from '@family-tree/shared';
 import { Inject, Injectable } from '@nestjs/common';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { eq } from 'drizzle-orm';

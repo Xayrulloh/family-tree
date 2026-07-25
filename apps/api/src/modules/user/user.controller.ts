@@ -23,13 +23,11 @@ import { JWTAuthGuard } from '~/common/guards/jwt-auth.guard';
 import { UserCacheInterceptor } from '~/common/interceptors/user.cache.interceptor';
 import type { AuthenticatedRequest } from '~/shared/types/request-with-user';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   UserIdParamDto,
   UserResponseDto,
   UserUpdateRequestDto,
 } from './dto/user.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { UserService } from './user.service';
 
 @ApiTags('User')

@@ -28,7 +28,6 @@ import { JWTAuthGuard } from '~/common/guards/jwt-auth.guard';
 import { OwnerGuard } from '~/common/guards/owner.guard';
 import { FamilyTreeCacheInterceptor } from '~/common/interceptors/family-tree.cache.interceptor';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FamilyTreeMemberCreateChildRequestDto,
   FamilyTreeMemberCreateParentsRequestDto,
@@ -40,7 +39,6 @@ import {
   FamilyTreeMemberGetResponseDto,
   FamilyTreeMemberUpdateRequestDto,
 } from '../dto/family-tree-member.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeMemberService } from '../services/family-tree-member.service';
 
 @ApiTags('Family Tree Member')

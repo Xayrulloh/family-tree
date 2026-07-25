@@ -12,13 +12,11 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { PublicGuard } from '~/common/guards/public.guard';
 import { FamilyTreeCacheInterceptor } from '~/common/interceptors/family-tree.cache.interceptor';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FamilyTreeMemberConnectionGetAllParamDto,
   FamilyTreeMemberConnectionGetAllResponseDto,
   FamilyTreeMemberConnectionGetByMemberParamDto,
 } from '../dto/family-tree-member-connection.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeMemberConnectionService } from '../services/family-tree-member-connection.service';
 
 @ApiTags('Family Tree Member Connection (public)')
