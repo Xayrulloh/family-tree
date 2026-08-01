@@ -8,6 +8,7 @@ import {
   boolean,
   date,
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -179,6 +180,17 @@ export const notificationReadsSchema = pgTable('notification_reads', {
     .defaultNow()
     .notNull(),
 });
+
+export const publicFamilyTreeVisitsSchema = pgTable(
+  'public_family_tree_visits',
+  {
+    familyTreeId: uuid('family_tree_id')
+      .references(() => familyTreesSchema.id, { onDelete: 'cascade' })
+      .notNull()
+      .primaryKey(),
+    visitCount: integer('visit_count').notNull().default(0),
+  },
+);
 
 // relations
 export const usersRelations = relations(usersSchema, ({ many }) => ({

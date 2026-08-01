@@ -4,7 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, eq, ilike, notLike, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  notLike,
+  sql,
+} from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CloudflareConfig } from '~/config/cloudflare/cloudflare.config';
 import { DrizzleAsyncProvider } from '~/database/drizzle.provider';
@@ -28,17 +37,44 @@ export class FamilyTreeService {
 
   private async paginateFamilyTrees(
     whereConditions: Parameters<typeof and>[0][],
-    { page, perPage }: { page: number; perPage: number },
+    {
+      page,
+      perPage,
+      sortByVisits = false,
+    }: { page: number; perPage: number; sortByVisits?: boolean },
   ): Promise<FamilyTreePaginationResponseDto> {
     const offset = (page - 1) * perPage;
 
     const [familyTrees, countResult] = await Promise.all([
-      this.db.query.familyTreesSchema.findMany({
-        where: and(...whereConditions),
-        orderBy: asc(schema.familyTreesSchema.createdAt),
-        limit: perPage,
-        offset,
-      }),
+      sortByVisits
+        ? this.db
+            .select(getTableColumns(schema.familyTreesSchema))
+            .from(schema.familyTreesSchema)
+            .leftJoin(
+              schema.publicFamilyTreeVisitsSchema,
+              eq(
+                schema.publicFamilyTreeVisitsSchema.familyTreeId,
+                schema.familyTreesSchema.id,
+              ),
+            )
+            .where(and(...whereConditions))
+            .orderBy(
+              desc(
+                sql<number>`coalesce(${schema.publicFamilyTreeVisitsSchema.visitCount}, 0)`,
+              ),
+              // Newest first among equal visit counts, so a freshly published
+              // tree surfaces at the top of the (large) zero-visit block
+              // instead of being buried where it can never earn visits.
+              desc(schema.familyTreesSchema.createdAt),
+            )
+            .limit(perPage)
+            .offset(offset)
+        : this.db.query.familyTreesSchema.findMany({
+            where: and(...whereConditions),
+            orderBy: asc(schema.familyTreesSchema.createdAt),
+            limit: perPage,
+            offset,
+          }),
 
       this.db
         .select({
@@ -82,7 +118,25 @@ export class FamilyTreeService {
       eq(schema.familyTreesSchema.isPublic, true),
     ];
 
-    return this.paginateFamilyTrees(whereConditions, { page, perPage });
+    return this.paginateFamilyTrees(whereConditions, {
+      page,
+      perPage,
+      sortByVisits: true,
+    });
+  }
+
+  async incrementPublicFamilyTreeVisitCount(
+    familyTreeId: string,
+  ): Promise<void> {
+    await this.db
+      .insert(schema.publicFamilyTreeVisitsSchema)
+      .values({ familyTreeId, visitCount: 1 })
+      .onConflictDoUpdate({
+        target: schema.publicFamilyTreeVisitsSchema.familyTreeId,
+        set: {
+          visitCount: sql`${schema.publicFamilyTreeVisitsSchema.visitCount} + 1`,
+        },
+      });
   }
 
   async getFamilyTreeById(id: string): Promise<FamilyTreeResponseDto> {

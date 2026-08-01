@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Query,
   UseGuards,
@@ -28,6 +29,8 @@ import { FamilyTreeService } from '../services/family-tree.service';
 @Controller('family-trees/public')
 @UseInterceptors(FamilyTreeCacheInterceptor)
 export class FamilyTreePublicController {
+  private readonly logger = new Logger(FamilyTreePublicController.name);
+
   constructor(private readonly familyTreeService: FamilyTreeService) {}
 
   @Get()
@@ -48,6 +51,10 @@ export class FamilyTreePublicController {
   async getPublicFamilyTreeById(
     @Param() param: FamilyTreeIdParamDto,
   ): Promise<FamilyTreeResponseDto> {
+    this.familyTreeService
+      .incrementPublicFamilyTreeVisitCount(param.id)
+      .catch((err) => this.logger.warn('Visit count increment failed', err));
+
     return this.familyTreeService.getFamilyTreeById(param.id);
   }
 }
