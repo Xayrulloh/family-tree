@@ -102,6 +102,19 @@ Tracks the last read time per user (single row per user, not per notification).
 | user_id | uuid → users.id | PK (not uuid default) |
 | updated_at | timestamp | notNull |
 
+**Drift warning:** migration `0009` created this table WITHOUT the primary key that `schema.ts` declares. `drizzle-kit generate` finally emitted the catch-up `ALTER TABLE "notification_reads" ADD PRIMARY KEY ("user_id")` inside migration `0021` (the visits feature). That statement fails on any DB that already has the PK — e.g. anything ever synced with `drizzle-kit push` — or that has duplicate `user_id` rows. Verify the target DB before applying 0021.
+
+### `public_family_tree_visits`
+Visit counter powering the public-tree ranking. No base fields — deliberately minimal, like `notification_reads`.
+| Column | Type | Notes |
+|---|---|---|
+| family_tree_id | uuid → family_trees.id | PK, cascade delete |
+| visit_count | integer | notNull, default 0 |
+
+- Written only by `GET /family-trees/public/:id` (atomic `INSERT … ON CONFLICT DO UPDATE`). Owner and shared views never count.
+- Read only as a sort key: the public list left-joins it and orders by `coalesce(visit_count, 0) DESC, created_at DESC`. `visit_count` is never selected into any API response, so it's absent from the shared Zod schemas and the frontend.
+- No `relations()` block — queried via an explicit join, not the relational query API.
+
 ## Relations summary
 - `users` → many `family_trees` (created), many `fcm_tokens`, many sent/received `notifications`
 - `family_trees` → many `family_tree_members`, many `family_tree_member_connections`

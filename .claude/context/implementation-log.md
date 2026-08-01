@@ -361,6 +361,21 @@ Branch `feature/isolation-routes` continued (all phases on same branch, no merge
 
 ---
 
+## 2026-08-01 — Issue #493: rank public family trees by visits
+
+- New `public_family_tree_visits` table (one row per tree, PK `family_tree_id` + cascade, `visit_count` int). Named "public…" because only the public scope counts visits.
+- `GET /family-trees/public/:id` increments via atomic `INSERT … ON CONFLICT DO UPDATE`; `paginateFamilyTrees` gained a `sortByVisits` flag that left-joins the visits table and orders by `coalesce(visit_count,0) DESC, created_at DESC`. Owner listing path untouched. Count is never selected into a response — pure sort key, so **no shared-schema or frontend change**.
+- Tests: 3 unit (mocked db), 8 integration, 3 E2E. `seedPublicFamilyTreeVisits` helper + new table added to `truncateTables`.
+- **Key note (cache map — verified by reading `FamilyTreeCacheInterceptor`, not the spec):** only THREE things are cached — the owner tree list (`users:${userId}:family-trees:*`, per-user, gated on `user` existing), members, and connections (both `family-trees:${treeId}:…`, treeId-keyed and **shared across owner/shared/public**). Single-tree GETs are cached for NO scope; the public list can't be cached because a per-user key can't serve anonymous traffic. Owner edits propagate to public viewers automatically because members/connections share one treeId-keyed entry that `cleanFamilyTreeMembers(treeId)` clears.
+- **Key note (why `/public/:id` must stay uncached):** the interceptor short-circuits a cache hit with `return of(cached)` **before** `next.handle()`. Caching that route would skip the controller entirely and silently stop visit counting — the ranking would freeze with no error. If it's ever cached, exclude the public scope or move the increment outside the handler.
+- **Key note (`drizzle-kit generate` diffs snapshots, not the live DB):** it compares against `meta/*_snapshot.json`. `notification_reads` was created in 0009 without a PK while `schema.ts` declares `.primaryKey()`, so that long-standing drift got folded into our `0021` as a stray `ALTER TABLE "notification_reads" ADD PRIMARY KEY`. It fails on a DB that already has the PK (any DB ever `push`-ed) or one with duplicate `user_id` rows. Left in place deliberately — check prod state before deploying 0021.
+- **Key note (no test tier covers migrations):** Testcontainers setup runs `drizzle-kit push`, deriving schema straight from `schema.ts`, so the `.sql` migration files are never executed by unit/integration/E2E. A green suite says nothing about whether a migration applies.
+- **Key note (tiebreak is a product decision):** equal visit counts order `created_at DESC` on purpose. With `ASC` (the pre-existing order) a brand-new public tree lands dead last in the zero-visit block — it needs visits to be seen and visibility to get visits. `DESC` floats new trees to the top of that block.
+- **Key note (fire-and-forget needs `.catch()`, not bare `void`):** `void promise` discards the promise without handling rejection; Node ≥15 terminates on unhandled rejections, so a flaky visit write could crash the API. Use `.catch(err => logger.warn(...))`. The pre-existing `cloudflareConfig.deleteFile(...)` calls carry this same latent risk.
+- **Key note (interceptor spec mocks its own route paths):** `makeContext` in `family-tree.cache.interceptor.spec.ts` hand-writes `route.path` strings, so those tests pass regardless of what NestJS actually registers at runtime. Don't treat them as evidence about real routing.
+
+---
+
 ## 2026-07-25 — Issue #503: disable `useImportType` for apps/api instead of per-line ignores
 
 - Ticket asked to "handle" the biome errors being skipped in imports — 41 `// biome-ignore lint/style/useImportType: ...` comments were scattered across 26 files in `apps/api/src` (controllers, services, guards, interceptors, strategies), suppressing the rule wherever a class is imported only to be used as a decorator parameter type (`@Query()`/`@Body()`/`@Param()` DTOs) or constructor-injected dependency.

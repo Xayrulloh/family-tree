@@ -76,6 +76,7 @@ Per-project (when you only want one):
 - Web Sonar coverage = unit + integration lcov merged (`sonar.javascript.lcov.reportPaths` comma list; integration coverage always on via `coverage.enabled: true` in `vitest.integration.config.ts`); `.tsx` files are excluded from the coverage metric (`sonar.coverage.exclusions`) because their tier is Playwright, which can't emit lcov — keep logic in `model.ts`, not `.tsx`.
 - API jest configs share `apps/api/jest.base.ts`. Gotcha: Jest's TS config loader needs the explicit extension — `import { baseConfig } from './jest.base.ts'` (extensionless fails with `ERR_MODULE_NOT_FOUND`).
 - Both API global teardowns delegate to `apps/api/src/test/docker-cleanup.ts` (`stopAndRemoveContainer`); Ryuk is the fallback reaper.
+- **No tier covers migrations.** Testcontainers setup runs `drizzle-kit push`, deriving schema straight from `schema.ts`, so the `.sql` files in `src/database/drizzle/` are never executed by unit, integration, or E2E. A fully green suite says nothing about whether a migration applies cleanly — verify those against a real DB. Related: `drizzle-kit generate` diffs against `meta/*_snapshot.json`, **not** the live DB, so pre-existing drift between the snapshots and `schema.ts` gets folded into whatever migration you generate next (see the `notification_reads` case in `db.md`).
 
 ## Test conventions
 - All spec files use AAA (Arrange-Act-Assert) blank-line grouping inside `it()` blocks: one blank line before the act, one before the first `expect()`. Single-line tests need no gaps.
