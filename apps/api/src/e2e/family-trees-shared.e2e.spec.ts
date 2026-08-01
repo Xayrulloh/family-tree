@@ -89,6 +89,9 @@ describe('Shared Family Trees (E2E)', () => {
       expect(res.body.familyTreeId).toBe(tree.id);
       expect(res.body.canAddMembers).toBe(true);
       expect(res.body.canEditMembers).toBe(false);
+      // This response spreads the whole family_trees row, so it is the most
+      // likely place for the internal visit counter to leak out.
+      expect(res.body.visitCount).toBeUndefined();
     });
 
     it('returns 403 for a user who has no share for the tree', async () => {

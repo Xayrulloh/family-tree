@@ -42,9 +42,25 @@ COOKIE_DOMAIN, COOKIE_CLIENT_URL
   - `FamilyTreeAccessGuard` — the original combined guard (owner→public→shared). **Still used, but only** for the shared-users RBAC PUT (the one genuinely "owner-OR-shared-with-all-perms" route).
 - `@RequirePermission('canAddMembers', ...)` decorator (`common/decorators/`) — declares which shared-tree flags a route needs; uses `SHARED_TREE_PERMISSION_KEY` from `src/utils/constants.ts`. Read by `SharedAccessGuard`/`FamilyTreeAccessGuard`.
 - **Guards are global** via `common/common.module.ts` (`@Global()`, imports `DrizzleModule`). Feature modules no longer need to list guards in `providers[]`. `CommonModule` is imported in `AppModule` before all feature modules.
-- `FamilyTreeCacheInterceptor` — Redis cache for family tree endpoints
+- `FamilyTreeCacheInterceptor` — Redis cache for family tree endpoints (see cache map below)
 - `UserCacheInterceptor` — Redis cache for user endpoints
 - `ZodResponseInterceptor` — response shape validation
+
+### What `FamilyTreeCacheInterceptor` actually caches
+It matches exactly three path shapes, so only three things are cached:
+
+| Route | Cached? | Key |
+|---|---|---|
+| `GET /family-trees` (owner list) | ✅ | `users:${userId}:family-trees:${query}` — per-user, gated on `user` existing |
+| `GET /family-trees/public` (public list) | ❌ | a per-user key can't serve anonymous traffic |
+| `GET /family-trees/:id` · `/public/:id` · `/shared/:id` | ❌ | no single-tree key exists in `CacheService` at all |
+| `GET …/:familyTreeId/members` (all 3 scopes) | ✅ | `family-trees:${treeId}:members` |
+| `GET …/:familyTreeId/members/connections` (all 3 scopes) | ✅ | `family-trees:${treeId}:members:connections` |
+
+- Members/connections are **treeId-keyed and shared across owner/shared/public** — the payload is identical whoever asks. This is why an owner's edit reaches public viewers: the mutation branch calls `cleanFamilyTreeMembers(treeId)`, clearing the same entry public readers use.
+- **Never cache `GET /family-trees/public/:id`.** The interceptor short-circuits a hit with `return of(cached)` *before* `next.handle()`, so a cache hit skips the controller — and with it the visit-count increment. The public ranking would silently freeze. If it's ever cached, exclude the public scope or move the increment out of the handler.
+- Guards run **before** interceptors, so a tree flipped to private is 404'd by `PublicGuard` (fresh DB read) before any cached payload could be served.
+- Gotcha: `family-tree.cache.interceptor.spec.ts` hand-writes `route.path` strings in its `makeContext` helper, so those tests pass regardless of what NestJS actually registers. They aren't evidence about real routing.
 
 ## Filters
 - `HttpFilter` — global HTTP exception filter
@@ -82,9 +98,9 @@ Controllers are registered in order: `FamilyTreePublicController` → `FamilyTre
 
 | Method | Route | Guard | Description |
 |---|---|---|---|
-| GET | `/family-trees` | JWT | List own trees (paginated+search, **no `isPublic` param**) |
-| GET | `/family-trees/public` | none | List all public trees (paginated+search, anonymous) |
-| GET | `/family-trees/public/:id` | PublicGuard (no JWT) | Get public tree by id (anon visitors) |
+| GET | `/family-trees` | JWT | List own trees (paginated+search, **no `isPublic` param**) — ordered `createdAt ASC` |
+| GET | `/family-trees/public` | none | List all public trees (paginated+search, anonymous) — **ordered by visit count DESC**, ties newest-first |
+| GET | `/family-trees/public/:id` | PublicGuard (no JWT) | Get public tree by id (anon visitors) — **increments the visit counter** |
 | GET | `/family-trees/shared` | JWT | Get trees shared with me (paginated+search) |
 | GET | `/family-trees/shared/:id` | JWT | Get single shared tree record |
 | GET | `/family-trees/shared/:id/users` | JWT | Get users with access to shared tree (paginated+search) |
