@@ -14,13 +14,11 @@ import { JWTAuthGuard } from '~/common/guards/jwt-auth.guard';
 import { SharedAccessGuard } from '~/common/guards/shared-access.guard';
 import { FamilyTreeCacheInterceptor } from '~/common/interceptors/family-tree.cache.interceptor';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FamilyTreeMemberConnectionGetAllParamDto,
   FamilyTreeMemberConnectionGetAllResponseDto,
   FamilyTreeMemberConnectionGetByMemberParamDto,
 } from '../dto/family-tree-member-connection.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeMemberConnectionService } from '../services/family-tree-member-connection.service';
 
 @ApiTags('Family Tree Member Connection (shared)')

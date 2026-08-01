@@ -1,6 +1,5 @@
 import type { JwtPayloadType, UserSchemaType } from '@family-tree/shared';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { JwtService } from '@nestjs/jwt';
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';

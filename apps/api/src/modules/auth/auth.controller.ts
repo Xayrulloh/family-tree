@@ -5,7 +5,6 @@ import { GoogleOauthGuard } from '~/common/guards/google-oauth.guard';
 import { checkedEnv } from '~/config/env/env';
 import type { AuthenticatedRequest } from '~/shared/types/request-with-user';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')

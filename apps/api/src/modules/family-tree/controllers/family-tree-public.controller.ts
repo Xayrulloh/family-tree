@@ -16,14 +16,12 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { PublicGuard } from '~/common/guards/public.guard';
 import { FamilyTreeCacheInterceptor } from '~/common/interceptors/family-tree.cache.interceptor';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FamilyTreeIdParamDto,
   FamilyTreePaginationAndSearchQueryDto,
   FamilyTreePaginationResponseDto,
   FamilyTreeResponseDto,
 } from '../dto/family-tree.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeService } from '../services/family-tree.service';
 
 @ApiTags('Family Tree (public)')

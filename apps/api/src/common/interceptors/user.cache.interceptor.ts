@@ -6,7 +6,6 @@ import {
   type NestInterceptor,
 } from '@nestjs/common';
 import { type Observable, of, tap } from 'rxjs';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { CacheService } from '../../config/cache/cache.service';
 
 @Injectable()

@@ -31,9 +31,7 @@ import { OwnerGuard } from '~/common/guards/owner.guard';
 import { FamilyTreeCacheInterceptor } from '~/common/interceptors/family-tree.cache.interceptor';
 import type { AuthenticatedRequest } from '~/shared/types/request-with-user';
 import { COOKIES_ACCESS_TOKEN_KEY } from '~/utils/constants';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeMemberService } from '../../family-tree-member/services/family-tree-member.service';
-// biome-ignore lint/style/useImportType: <query/param doesn't work>
 import {
   FamilyTreeCreateRequestDto,
   FamilyTreeIdParamDto,
@@ -43,7 +41,6 @@ import {
   FamilyTreeResponseDto,
   FamilyTreeUpdateRequestDto,
 } from '../dto/family-tree.dto';
-// biome-ignore lint/style/useImportType: <throws an error if put type>
 import { FamilyTreeService } from '../services/family-tree.service';
 
 @ApiTags('Family Tree')
