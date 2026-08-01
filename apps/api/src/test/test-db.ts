@@ -46,7 +46,6 @@ export async function truncateTables(): Promise<void> {
       family_tree_member_connections,
       family_tree_members,
       shared_family_trees,
-      public_family_tree_visits,
       family_trees,
       users
     CASCADE

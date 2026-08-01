@@ -10,6 +10,8 @@ import { getTestDb, truncateTables } from '~/test/test-db';
 
 // The visit increment is fire-and-forget, so it may land after the response.
 // Poll instead of sleeping a fixed duration, which flakes on a loaded runner.
+// Every test that triggers an increment must drain it before returning, or the
+// write can still be in flight when the pool closes in afterAll.
 async function waitForVisitCount(
   familyTreeId: string,
   expected: number,
@@ -17,10 +19,8 @@ async function waitForVisitCount(
   for (let attempt = 0; attempt < 50; attempt++) {
     const [row] = await getTestDb()
       .select()
-      .from(schema.publicFamilyTreeVisitsSchema)
-      .where(
-        eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, familyTreeId),
-      );
+      .from(schema.familyTreesSchema)
+      .where(eq(schema.familyTreesSchema.id, familyTreeId));
 
     if (row?.visitCount === expected) return;
 
@@ -110,6 +110,8 @@ describe('Family Trees — Public (E2E)', () => {
         .expect(200);
 
       expect(res.body.visitCount).toBeUndefined();
+
+      await waitForVisitCount(tree.id, 1);
     });
 
     it('bumps the tree above a less-visited one in the public list', async () => {
@@ -145,12 +147,12 @@ describe('Family Trees — Public (E2E)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      const visits = await getTestDb()
+      const [row] = await getTestDb()
         .select()
-        .from(schema.publicFamilyTreeVisitsSchema)
-        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+        .from(schema.familyTreesSchema)
+        .where(eq(schema.familyTreesSchema.id, tree.id));
 
-      expect(visits).toHaveLength(0);
+      expect(row.visitCount).toBe(0);
     });
   });
 });

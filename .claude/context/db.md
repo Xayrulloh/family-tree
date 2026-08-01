@@ -104,16 +104,14 @@ Tracks the last read time per user (single row per user, not per notification).
 
 **Drift warning:** migration `0009` created this table WITHOUT the primary key that `schema.ts` declares. `drizzle-kit generate` finally emitted the catch-up `ALTER TABLE "notification_reads" ADD PRIMARY KEY ("user_id")` inside migration `0021` (the visits feature). That statement fails on any DB that already has the PK — e.g. anything ever synced with `drizzle-kit push` — or that has duplicate `user_id` rows. Verify the target DB before applying 0021.
 
-### `public_family_tree_visits`
-Visit counter powering the public-tree ranking. No base fields — deliberately minimal, like `notification_reads`.
-| Column | Type | Notes |
-|---|---|---|
-| family_tree_id | uuid → family_trees.id | PK, cascade delete |
-| visit_count | integer | notNull, default 0 |
-
-- Written only by `GET /family-trees/public/:id` (atomic `INSERT … ON CONFLICT DO UPDATE`). Owner and shared views never count.
-- Read only as a sort key: the public list left-joins it and orders by `coalesce(visit_count, 0) DESC, created_at DESC`. `visit_count` is never selected into any API response, so it's absent from the shared Zod schemas and the frontend.
-- No `relations()` block — queried via an explicit join, not the relational query API.
+### Visit counting (`family_trees.visit_count`)
+Powers the public-tree ranking. Lives as a column on `family_trees`, not a side table.
+- Written only by `GET /family-trees/public/:id`. Owner and shared views never count.
+- **The increment uses raw SQL on purpose.** `baseSchema.updatedAt` has `$onUpdate(() => …)`, so a drizzle `.update()` would bump `updatedAt` on every *view* — marking a tree as modified merely for being looked at. `this.db.execute(sql\`UPDATE … SET visit_count = visit_count + 1\`)` bypasses that hook. Don't "simplify" it back to `.update()`.
+- Read as a sort key only: the public list orders by `visit_count DESC, created_at DESC, id DESC`. The `id` key makes the order **total** — without it, ties on both leading keys let LIMIT/OFFSET repeat or drop a tree across pages.
+- `visit_count` is absent from `FamilyTreeSchema`, so it never reaches an API response (`@ZodSerializerDto` strips it). The service's own return type doesn't expose it either — reading `.visitCount` off `getFamilyTreeById()` is a compile error, which is why tests query the row directly.
+- Served by `public_visit_rank_idx` on `(is_public, visit_count, created_at, id)`; Postgres scans it backwards for the all-DESC ordering, so no DESC index is needed.
+- An earlier revision used a separate `public_family_tree_visits` table (created in migration `0021`) to keep visits from invalidating a `family_trees` cache. That premise turned out false — no single-tree or public-list route is cached — so it was folded into this column. If a DB has `0021` applied, the table is dropped by the follow-up migration.
 
 ## Relations summary
 - `users` → many `family_trees` (created), many `fcm_tokens`, many sent/received `notifications`

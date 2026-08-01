@@ -53,7 +53,14 @@ export class FamilyTreePublicController {
   ): Promise<FamilyTreeResponseDto> {
     this.familyTreeService
       .incrementPublicFamilyTreeVisitCount(param.id)
-      .catch((err) => this.logger.warn('Visit count increment failed', err));
+      .catch((err: unknown) =>
+        // `error` (not `warn`) so the stack is formatted: a silent failure here
+        // stalls the public ranking with no other symptom.
+        this.logger.error(
+          `Visit count increment failed for tree ${param.id}`,
+          err instanceof Error ? err.stack : String(err),
+        ),
+      );
 
     return this.familyTreeService.getFamilyTreeById(param.id);
   }

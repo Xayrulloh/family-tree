@@ -4,16 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  getTableColumns,
-  ilike,
-  notLike,
-  sql,
-} from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, notLike, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CloudflareConfig } from '~/config/cloudflare/cloudflare.config';
 import { DrizzleAsyncProvider } from '~/database/drizzle.provider';
@@ -46,35 +37,25 @@ export class FamilyTreeService {
     const offset = (page - 1) * perPage;
 
     const [familyTrees, countResult] = await Promise.all([
-      sortByVisits
-        ? this.db
-            .select(getTableColumns(schema.familyTreesSchema))
-            .from(schema.familyTreesSchema)
-            .leftJoin(
-              schema.publicFamilyTreeVisitsSchema,
-              eq(
-                schema.publicFamilyTreeVisitsSchema.familyTreeId,
-                schema.familyTreesSchema.id,
-              ),
-            )
-            .where(and(...whereConditions))
-            .orderBy(
-              desc(
-                sql<number>`coalesce(${schema.publicFamilyTreeVisitsSchema.visitCount}, 0)`,
-              ),
+      this.db.query.familyTreesSchema.findMany({
+        where: and(...whereConditions),
+        orderBy: sortByVisits
+          ? [
+              desc(schema.familyTreesSchema.visitCount),
               // Newest first among equal visit counts, so a freshly published
               // tree surfaces at the top of the (large) zero-visit block
               // instead of being buried where it can never earn visits.
               desc(schema.familyTreesSchema.createdAt),
-            )
-            .limit(perPage)
-            .offset(offset)
-        : this.db.query.familyTreesSchema.findMany({
-            where: and(...whereConditions),
-            orderBy: asc(schema.familyTreesSchema.createdAt),
-            limit: perPage,
-            offset,
-          }),
+              // Neither key above is unique, and `createdAt` ties whenever rows
+              // are inserted in one transaction. Without a unique final key the
+              // order isn't total, so LIMIT/OFFSET can repeat or drop a tree
+              // across pages.
+              desc(schema.familyTreesSchema.id),
+            ]
+          : asc(schema.familyTreesSchema.createdAt),
+        limit: perPage,
+        offset,
+      }),
 
       this.db
         .select({
@@ -128,15 +109,14 @@ export class FamilyTreeService {
   async incrementPublicFamilyTreeVisitCount(
     familyTreeId: string,
   ): Promise<void> {
-    await this.db
-      .insert(schema.publicFamilyTreeVisitsSchema)
-      .values({ familyTreeId, visitCount: 1 })
-      .onConflictDoUpdate({
-        target: schema.publicFamilyTreeVisitsSchema.familyTreeId,
-        set: {
-          visitCount: sql`${schema.publicFamilyTreeVisitsSchema.visitCount} + 1`,
-        },
-      });
+    // Raw SQL on purpose: drizzle's `.update()` triggers the `$onUpdate` hook on
+    // `updatedAt`, which would mark a tree as modified every time it is merely
+    // viewed. The increment is read-modify-write free, so it is race-safe.
+    await this.db.execute(
+      sql`UPDATE ${schema.familyTreesSchema}
+          SET visit_count = visit_count + 1
+          WHERE ${schema.familyTreesSchema.id} = ${familyTreeId}`,
+    );
   }
 
   async getFamilyTreeById(id: string): Promise<FamilyTreeResponseDto> {

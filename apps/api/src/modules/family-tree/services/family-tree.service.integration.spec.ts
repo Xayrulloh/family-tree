@@ -2,12 +2,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import * as schema from '~/database/schema';
-import {
-  seedFamilyTree,
-  seedMember,
-  seedPublicFamilyTreeVisits,
-  seedUser,
-} from '~/test/seeds';
+import { seedFamilyTree, seedMember, seedUser } from '~/test/seeds';
 import { getTestDb, truncateTables } from '~/test/test-db';
 import { FamilyTreeService } from './family-tree.service';
 
@@ -274,11 +269,11 @@ describe('FamilyTreeService (integration)', () => {
       const user = await seedUser(getTestDb());
 
       const olderTree = await seedFamilyTree(getTestDb(), user.id);
-      const newerTree = await seedFamilyTree(getTestDb(), user.id);
-
       // Give the newer tree more visits than the older one — the owner
       // listing must not be swayed by this, unlike the public listing.
-      await seedPublicFamilyTreeVisits(getTestDb(), newerTree.id, 100);
+      const newerTree = await seedFamilyTree(getTestDb(), user.id, {
+        visitCount: 100,
+      });
 
       const result = await service.getFamilyTreesOfUser(user.id, {
         page: 1,
@@ -313,13 +308,12 @@ describe('FamilyTreeService (integration)', () => {
 
       const lessVisited = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 1,
       });
       const mostVisited = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 5,
       });
-
-      await seedPublicFamilyTreeVisits(getTestDb(), lessVisited.id, 1);
-      await seedPublicFamilyTreeVisits(getTestDb(), mostVisited.id, 5);
 
       const result = await service.getPublicFamilyTrees({
         page: 1,
@@ -340,9 +334,8 @@ describe('FamilyTreeService (integration)', () => {
       });
       const visited = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 1,
       });
-
-      await seedPublicFamilyTreeVisits(getTestDb(), visited.id, 1);
 
       const result = await service.getPublicFamilyTrees({
         page: 1,
@@ -361,17 +354,16 @@ describe('FamilyTreeService (integration)', () => {
 
       const first = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 30,
       });
       const second = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 20,
       });
       const third = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 10,
       });
-
-      await seedPublicFamilyTreeVisits(getTestDb(), first.id, 30);
-      await seedPublicFamilyTreeVisits(getTestDb(), second.id, 20);
-      await seedPublicFamilyTreeVisits(getTestDb(), third.id, 10);
 
       const page1 = await service.getPublicFamilyTrees({
         page: 1,
@@ -395,13 +387,12 @@ describe('FamilyTreeService (integration)', () => {
 
       const olderTree = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 7,
       });
       const newerTree = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
+        visitCount: 7,
       });
-
-      await seedPublicFamilyTreeVisits(getTestDb(), olderTree.id, 7);
-      await seedPublicFamilyTreeVisits(getTestDb(), newerTree.id, 7);
 
       const result = await service.getPublicFamilyTrees({
         page: 1,
@@ -434,58 +425,94 @@ describe('FamilyTreeService (integration)', () => {
         olderTree.id,
       ]);
     });
+
+    it('pages disjointly when trees tie on both visit count and createdAt', async () => {
+      const user = await seedUser(getTestDb());
+      // `defaultNow()` is the transaction timestamp, so rows written in one
+      // statement share a createdAt. Without the id tiebreaker the sort is not
+      // total and LIMIT/OFFSET can repeat or drop a tree across pages.
+      const createdAt = new Date().toISOString();
+
+      await getTestDb()
+        .insert(schema.familyTreesSchema)
+        .values(
+          ['Tie A', 'Tie B', 'Tie C', 'Tie D'].map((name) => ({
+            name,
+            createdBy: user.id,
+            isPublic: true,
+            visitCount: 4,
+            createdAt,
+          })),
+        );
+
+      const [page1, page2] = await Promise.all([
+        service.getPublicFamilyTrees({ page: 1, perPage: 2 }),
+        service.getPublicFamilyTrees({ page: 2, perPage: 2 }),
+      ]);
+
+      const page1Ids = page1.familyTrees.map((tree) => tree.id);
+      const page2Ids = page2.familyTrees.map((tree) => tree.id);
+
+      expect(new Set([...page1Ids, ...page2Ids]).size).toBe(4);
+      expect(page1Ids.filter((id) => page2Ids.includes(id))).toEqual([]);
+    });
   });
 
   describe('incrementPublicFamilyTreeVisitCount', () => {
-    it('creates a visit row with count 1 on the first call', async () => {
+    it('increments the count on each call', async () => {
       const user = await seedUser(getTestDb());
       const tree = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
       });
 
       await service.incrementPublicFamilyTreeVisitCount(tree.id);
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
 
-      const [visits] = await getTestDb()
+      // Read the row directly: `visitCount` is deliberately absent from
+      // FamilyTreeResponseDto so it can never reach an API response.
+      const [updated] = await getTestDb()
         .select()
-        .from(schema.publicFamilyTreeVisitsSchema)
-        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+        .from(schema.familyTreesSchema)
+        .where(eq(schema.familyTreesSchema.id, tree.id));
 
-      expect(visits.visitCount).toBe(1);
+      expect(updated.visitCount).toBe(3);
     });
 
-    it('increments the existing count on subsequent calls', async () => {
+    it('does not bump updatedAt when counting a visit', async () => {
       const user = await seedUser(getTestDb());
       const tree = await seedFamilyTree(getTestDb(), user.id, {
         isPublic: true,
       });
 
       await service.incrementPublicFamilyTreeVisitCount(tree.id);
-      await service.incrementPublicFamilyTreeVisitCount(tree.id);
-      await service.incrementPublicFamilyTreeVisitCount(tree.id);
 
-      const [visits] = await getTestDb()
+      const [updated] = await getTestDb()
         .select()
-        .from(schema.publicFamilyTreeVisitsSchema)
-        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+        .from(schema.familyTreesSchema)
+        .where(eq(schema.familyTreesSchema.id, tree.id));
 
-      expect(visits.visitCount).toBe(3);
+      // Viewing a tree is not modifying it — anything relying on updatedAt
+      // (caches, sync clients) must not see a visit as an edit.
+      expect(updated.visitCount).toBe(1);
+      expect(updated.updatedAt).toBe(tree.updatedAt);
     });
 
-    it('removes the visit row when the family tree is deleted (cascade)', async () => {
+    it('leaves other trees untouched', async () => {
       const user = await seedUser(getTestDb());
-      const tree = await seedFamilyTree(getTestDb(), user.id, {
-        isPublic: true,
-      });
+      const [visited, untouched] = await Promise.all([
+        seedFamilyTree(getTestDb(), user.id, { isPublic: true }),
+        seedFamilyTree(getTestDb(), user.id, { isPublic: true }),
+      ]);
 
-      await service.incrementPublicFamilyTreeVisitCount(tree.id);
-      await service.deleteFamilyTree(tree.id);
+      await service.incrementPublicFamilyTreeVisitCount(visited.id);
 
-      const visits = await getTestDb()
+      const [other] = await getTestDb()
         .select()
-        .from(schema.publicFamilyTreeVisitsSchema)
-        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+        .from(schema.familyTreesSchema)
+        .where(eq(schema.familyTreesSchema.id, untouched.id));
 
-      expect(visits).toHaveLength(0);
+      expect(other.visitCount).toBe(0);
     });
   });
 });

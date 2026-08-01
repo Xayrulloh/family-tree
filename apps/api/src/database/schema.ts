@@ -76,11 +76,21 @@ export const familyTreesSchema = pgTable(
       .notNull(),
     image: text('image'),
     isPublic: boolean('is_public').notNull().default(false),
+    visitCount: integer('visit_count').notNull().default(0),
     ...baseSchema,
   },
   (table) => ({
     nameAndUserIdx: unique('name_and_user_idx').on(table.name, table.createdBy),
     isPublicIdx: index('is_public_idx').on(table.isPublic),
+    // Serves the public listing: filter on is_public, then order by
+    // visit_count/created_at/id. Postgres scans this backwards to satisfy the
+    // all-DESC ordering, so no separate DESC index is needed.
+    publicVisitRankIdx: index('public_visit_rank_idx').on(
+      table.isPublic,
+      table.visitCount,
+      table.createdAt,
+      table.id,
+    ),
   }),
 );
 
@@ -180,17 +190,6 @@ export const notificationReadsSchema = pgTable('notification_reads', {
     .defaultNow()
     .notNull(),
 });
-
-export const publicFamilyTreeVisitsSchema = pgTable(
-  'public_family_tree_visits',
-  {
-    familyTreeId: uuid('family_tree_id')
-      .references(() => familyTreesSchema.id, { onDelete: 'cascade' })
-      .notNull()
-      .primaryKey(),
-    visitCount: integer('visit_count').notNull().default(0),
-  },
-);
 
 // relations
 export const usersRelations = relations(usersSchema, ({ many }) => ({
