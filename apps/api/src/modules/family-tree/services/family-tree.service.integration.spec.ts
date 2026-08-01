@@ -1,6 +1,13 @@
 /// <reference types="jest" />
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { seedFamilyTree, seedMember, seedUser } from '~/test/seeds';
+import { eq } from 'drizzle-orm';
+import * as schema from '~/database/schema';
+import {
+  seedFamilyTree,
+  seedMember,
+  seedPublicFamilyTreeVisits,
+  seedUser,
+} from '~/test/seeds';
 import { getTestDb, truncateTables } from '~/test/test-db';
 import { FamilyTreeService } from './family-tree.service';
 
@@ -262,6 +269,27 @@ describe('FamilyTreeService (integration)', () => {
       expect(page1.totalCount).toBe(3);
       expect(page2.familyTrees).toHaveLength(1);
     });
+
+    it('keeps ordering by createdAt, unaffected by visit counts', async () => {
+      const user = await seedUser(getTestDb());
+
+      const olderTree = await seedFamilyTree(getTestDb(), user.id);
+      const newerTree = await seedFamilyTree(getTestDb(), user.id);
+
+      // Give the newer tree more visits than the older one — the owner
+      // listing must not be swayed by this, unlike the public listing.
+      await seedPublicFamilyTreeVisits(getTestDb(), newerTree.id, 100);
+
+      const result = await service.getFamilyTreesOfUser(user.id, {
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result.familyTrees.map((tree) => tree.id)).toEqual([
+        olderTree.id,
+        newerTree.id,
+      ]);
+    });
   });
 
   describe('getPublicFamilyTrees', () => {
@@ -278,6 +306,186 @@ describe('FamilyTreeService (integration)', () => {
 
       expect(result.totalCount).toBe(1);
       expect(result.familyTrees[0].isPublic).toBe(true);
+    });
+
+    it('orders trees by visit count descending', async () => {
+      const user = await seedUser(getTestDb());
+
+      const lessVisited = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const mostVisited = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await seedPublicFamilyTreeVisits(getTestDb(), lessVisited.id, 1);
+      await seedPublicFamilyTreeVisits(getTestDb(), mostVisited.id, 5);
+
+      const result = await service.getPublicFamilyTrees({
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result.familyTrees.map((tree) => tree.id)).toEqual([
+        mostVisited.id,
+        lessVisited.id,
+      ]);
+    });
+
+    it('ranks trees with no visits last, without excluding them', async () => {
+      const user = await seedUser(getTestDb());
+
+      const unvisited = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const visited = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await seedPublicFamilyTreeVisits(getTestDb(), visited.id, 1);
+
+      const result = await service.getPublicFamilyTrees({
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result.totalCount).toBe(2);
+      expect(result.familyTrees.map((tree) => tree.id)).toEqual([
+        visited.id,
+        unvisited.id,
+      ]);
+    });
+
+    it('paginates correctly while preserving visit-count order', async () => {
+      const user = await seedUser(getTestDb());
+
+      const first = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const second = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const third = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await seedPublicFamilyTreeVisits(getTestDb(), first.id, 30);
+      await seedPublicFamilyTreeVisits(getTestDb(), second.id, 20);
+      await seedPublicFamilyTreeVisits(getTestDb(), third.id, 10);
+
+      const page1 = await service.getPublicFamilyTrees({
+        page: 1,
+        perPage: 2,
+      });
+      const page2 = await service.getPublicFamilyTrees({
+        page: 2,
+        perPage: 2,
+      });
+
+      expect(page1.totalCount).toBe(3);
+      expect(page1.familyTrees.map((tree) => tree.id)).toEqual([
+        first.id,
+        second.id,
+      ]);
+      expect(page2.familyTrees.map((tree) => tree.id)).toEqual([third.id]);
+    });
+
+    it('breaks ties on equal visit counts with the newest tree first', async () => {
+      const user = await seedUser(getTestDb());
+
+      const olderTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const newerTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await seedPublicFamilyTreeVisits(getTestDb(), olderTree.id, 7);
+      await seedPublicFamilyTreeVisits(getTestDb(), newerTree.id, 7);
+
+      const result = await service.getPublicFamilyTrees({
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result.familyTrees.map((tree) => tree.id)).toEqual([
+        newerTree.id,
+        olderTree.id,
+      ]);
+    });
+
+    it('surfaces a brand new tree above older ones that also have no visits', async () => {
+      const user = await seedUser(getTestDb());
+
+      const olderTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const newestTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      const result = await service.getPublicFamilyTrees({
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result.familyTrees.map((tree) => tree.id)).toEqual([
+        newestTree.id,
+        olderTree.id,
+      ]);
+    });
+  });
+
+  describe('incrementPublicFamilyTreeVisitCount', () => {
+    it('creates a visit row with count 1 on the first call', async () => {
+      const user = await seedUser(getTestDb());
+      const tree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+
+      const [visits] = await getTestDb()
+        .select()
+        .from(schema.publicFamilyTreeVisitsSchema)
+        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+
+      expect(visits.visitCount).toBe(1);
+    });
+
+    it('increments the existing count on subsequent calls', async () => {
+      const user = await seedUser(getTestDb());
+      const tree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+
+      const [visits] = await getTestDb()
+        .select()
+        .from(schema.publicFamilyTreeVisitsSchema)
+        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+
+      expect(visits.visitCount).toBe(3);
+    });
+
+    it('removes the visit row when the family tree is deleted (cascade)', async () => {
+      const user = await seedUser(getTestDb());
+      const tree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await service.incrementPublicFamilyTreeVisitCount(tree.id);
+      await service.deleteFamilyTree(tree.id);
+
+      const visits = await getTestDb()
+        .select()
+        .from(schema.publicFamilyTreeVisitsSchema)
+        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+
+      expect(visits).toHaveLength(0);
     });
   });
 });

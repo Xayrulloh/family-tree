@@ -1,16 +1,42 @@
 /// <reference types="jest" />
 import type { INestApplication } from '@nestjs/common';
+import type { JwtService } from '@nestjs/jwt';
+import { eq } from 'drizzle-orm';
 import type supertest from 'supertest';
-import { createE2EApp } from '~/test/create-e2e-app';
+import * as schema from '~/database/schema';
+import { createE2EApp, signToken } from '~/test/create-e2e-app';
 import { seedFamilyTree, seedUser } from '~/test/seeds';
 import { getTestDb, truncateTables } from '~/test/test-db';
+
+// The visit increment is fire-and-forget, so it may land after the response.
+// Poll instead of sleeping a fixed duration, which flakes on a loaded runner.
+async function waitForVisitCount(
+  familyTreeId: string,
+  expected: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const [row] = await getTestDb()
+      .select()
+      .from(schema.publicFamilyTreeVisitsSchema)
+      .where(
+        eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, familyTreeId),
+      );
+
+    if (row?.visitCount === expected) return;
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+
+  throw new Error(`visit count for ${familyTreeId} never reached ${expected}`);
+}
 
 describe('Family Trees — Public (E2E)', () => {
   let app: INestApplication;
   let req: ReturnType<typeof supertest>;
+  let jwtService: JwtService;
 
   beforeAll(async () => {
-    ({ app, req } = await createE2EApp());
+    ({ app, req, jwtService } = await createE2EApp());
   });
 
   beforeEach(async () => {
@@ -71,6 +97,60 @@ describe('Family Trees — Public (E2E)', () => {
       await req
         .get('/api/family-trees/public/00000000-0000-0000-0000-000000000000')
         .expect(404);
+    });
+
+    it('does not leak the visit count in the response body', async () => {
+      const user = await seedUser(getTestDb());
+      const tree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      const res = await req
+        .get(`/api/family-trees/public/${tree.id}`)
+        .expect(200);
+
+      expect(res.body.visitCount).toBeUndefined();
+    });
+
+    it('bumps the tree above a less-visited one in the public list', async () => {
+      const user = await seedUser(getTestDb());
+      const popularTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const quietTree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+
+      await req.get(`/api/family-trees/public/${popularTree.id}`).expect(200);
+      await req.get(`/api/family-trees/public/${popularTree.id}`).expect(200);
+      await waitForVisitCount(popularTree.id, 2);
+
+      const res = await req.get('/api/family-trees/public').expect(200);
+      const ids = res.body.familyTrees.map((tree: { id: string }) => tree.id);
+
+      expect(ids.indexOf(popularTree.id)).toBeLessThan(
+        ids.indexOf(quietTree.id),
+      );
+    });
+
+    it('does not count the owner viewing their own tree as a public visit', async () => {
+      const user = await seedUser(getTestDb());
+      const tree = await seedFamilyTree(getTestDb(), user.id, {
+        isPublic: true,
+      });
+      const token = await signToken(jwtService, user);
+
+      await req
+        .get(`/api/family-trees/${tree.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      const visits = await getTestDb()
+        .select()
+        .from(schema.publicFamilyTreeVisitsSchema)
+        .where(eq(schema.publicFamilyTreeVisitsSchema.familyTreeId, tree.id));
+
+      expect(visits).toHaveLength(0);
     });
   });
 });

@@ -45,6 +45,19 @@ export async function seedFamilyTree(
   return tree;
 }
 
+export async function seedPublicFamilyTreeVisits(
+  db: NodePgDatabase<typeof schema>,
+  familyTreeId: string,
+  visitCount: number,
+) {
+  const [visits] = await db
+    .insert(schema.publicFamilyTreeVisitsSchema)
+    .values({ familyTreeId, visitCount })
+    .returning();
+
+  return visits;
+}
+
 export async function seedMember(
   db: NodePgDatabase<typeof schema>,
   familyTreeId: string,
