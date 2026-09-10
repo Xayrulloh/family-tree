@@ -44,6 +44,8 @@ vite.config.*.timestamp*
 # environments
 .env*
 !.env.example
+!.envrc
+.direnv/
 
 # static analysis
 .scannerwork
