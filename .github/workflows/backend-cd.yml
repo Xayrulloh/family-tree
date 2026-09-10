@@ -14,7 +14,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   IMAGE_TAG: ghcr.io/xayrulloh/family-tree-api:stable
-  DEPLOY_PATH: /opt/family-tree/production
 
 jobs:
   build:
@@ -74,99 +73,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment: prod
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Create deploy directory
-        run: mkdir -p deploy
-
-      - name: Fetch Infisical secrets
-        uses: Infisical/secrets-action@v1.0.7
-        with:
-          client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
-          client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          project-slug: ${{ secrets.INFISICAL_PROJECT_ID }}
-          env-slug: prod
-          export-type: file
-          file-output-path: "/deploy/.env"
-          include-imports: true
-          recursive: true
-
-      - name: Add runtime vars
-        run: |
-          echo "DOCKER_IMAGE=${{ env.IMAGE_TAG }}" >> deploy/.env
-
-      - name: Prepare files for upload
-        id: prepare-files
-        run: |
-          cp deploy/.env .env
-          chmod 644 .env
-
-          cp apps/api/docker-compose.yml docker-compose.yml
-          chmod 644 docker-compose.yml
-
-          echo "Files to upload:"
-          ls -la .env docker-compose.yml
-
-          ENV_BASE64=$(base64 -w 0 .env 2>/dev/null || base64 .env)
-          COMPOSE_BASE64=$(base64 -w 0 docker-compose.yml 2>/dev/null || base64 docker-compose.yml)
-
-          echo "env_base64=$ENV_BASE64" >> $GITHUB_OUTPUT
-          echo "compose_base64=$COMPOSE_BASE64" >> $GITHUB_OUTPUT
-
-      - name: Upload deployment files to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          envs: ENV_BASE64,COMPOSE_BASE64
-          script: |
-            bash -c '
-            set -e
-            cd ${{ env.DEPLOY_PATH }}
-
-            echo "Removing old files if they exist..."
-            sudo rm -f .env docker-compose.yml || true
-
-            echo "Creating .env file..."
-            echo "$ENV_BASE64" | base64 -d | sudo tee .env > /dev/null
-
-            echo "Creating docker-compose.yml file..."
-            echo "$COMPOSE_BASE64" | base64 -d | sudo tee docker-compose.yml > /dev/null
-
-            echo "Files uploaded successfully:"
-            ls -la .env docker-compose.yml
-            '
+      - name: Request Dokploy deployment
         env:
-          ENV_BASE64: ${{ steps.prepare-files.outputs.env_base64 }}
-          COMPOSE_BASE64: ${{ steps.prepare-files.outputs.compose_base64 }}
-
-      - name: Deploy on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          script: |
-            bash -c "
-            set -e
-
-            cd ${{ env.DEPLOY_PATH }}
-
-            echo 'Logging into GHCR...'
-            echo '${{ secrets.GHP_TOKEN }}' | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            echo 'Pulling latest image...'
-            docker compose pull
-
-            echo 'Restarting containers...'
-            docker compose up -d --remove-orphans
-
-            echo 'Cleaning unused images...'
-            docker image prune -f
-
-            echo 'Deployment complete 🎉'
-            "
+          DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+          DOKPLOY_COMPOSE_ID: ${{ vars.DOKPLOY_COMPOSE_ID }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+        run: |
+          set -euo pipefail
+          : "${DOKPLOY_URL:?Set the DOKPLOY_URL environment variable}"
+          : "${DOKPLOY_COMPOSE_ID:?Set the DOKPLOY_COMPOSE_ID environment variable}"
+          : "${DOKPLOY_API_KEY:?Set the DOKPLOY_API_KEY environment secret}"
+          payload=$(jq -nc --arg composeId "$DOKPLOY_COMPOSE_ID" '{composeId: $composeId}')
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
+            --request POST "${DOKPLOY_URL%/}/api/compose.deploy" \
+            --header "x-api-key: $DOKPLOY_API_KEY" \
+            --header 'Content-Type: application/json' \
+            --data "$payload" --output /dev/null
+          echo 'Deployment queued. Check Dokploy deployment logs for rollout status.' >> "$GITHUB_STEP_SUMMARY"
